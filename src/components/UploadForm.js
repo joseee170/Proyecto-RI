@@ -10,25 +10,41 @@ function UploadForm({ actualizar }) {
 
     const subirArchivo = async () => {
 
-        const formData = new FormData();
+        try{
 
-        formData.append("archivo", archivo);
-        formData.append("keywords", keywords);
+            const formData = new FormData();
 
-        await axios.post(
-            "http://localhost:3001/upload",
-            formData,
-            {
-                headers:{
-                    Authorization:
-                        localStorage.getItem("token")
+            formData.append(
+                "archivo",
+                archivo
+            );
+
+            formData.append(
+                "keywords",
+                keywords
+            );
+
+            const res = await axios.post(
+                "http://localhost:3001/upload",
+                formData,
+                {
+                    headers:{
+                        Authorization:
+                            localStorage.getItem("token")
+                    }
                 }
-            }
-        );
+            );
 
-        alert("Archivo subido");
+            alert(res.data.mensaje);
 
-        actualizar();
+            actualizar();
+
+        }catch(error){
+
+            console.log(error);
+
+            alert("Error al subir");
+        }
     };
 
     return (

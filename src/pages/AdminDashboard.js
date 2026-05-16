@@ -18,10 +18,20 @@ function AdminDashboard() {
         try{
 
             const res = await axios.get(
-                `http://localhost:3001/buscar?q=${busqueda}`
+                `http://localhost:3001/buscar?q=${busqueda}`,
+                {
+                    headers:{
+                        Authorization:
+                            localStorage.getItem("token")
+                    }
+                }
             );
 
-            setResultados(res.data);
+            setResultados(
+                Array.isArray(res.data)
+                ? res.data
+                : []
+            );
 
         }catch(error){
 
