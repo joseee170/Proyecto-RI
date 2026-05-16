@@ -1,0 +1,21 @@
+.navbar{
+    background:#1e293b;
+    color:white;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.navbar-title{
+    font-size:24px;
+    font-weight:bold;
+}
+
+.navbar button{
+    background:#ef4444;
+}
+
+.navbar button:hover{
+    background:#dc2626;
+}
