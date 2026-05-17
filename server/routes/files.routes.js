@@ -8,6 +8,7 @@ const verificarToken = require("../middleware/auth");
 
 const textExtractor = require("../utils/textExtractor");
 const sorter = require("../utils/sorter");
+const extraerTextoImagen = require("../utils/ocr");
 
 const router = express.Router();
 
@@ -40,7 +41,15 @@ router.post("/upload", verificarToken, upload.single("archivo"), async (req, res
         const ruta = req.file.path.replace(/\\/g, "/");
         const tipo = req.file.mimetype;
 
-        const texto = await textExtractor(ruta, tipo);
+        let texto = await textExtractor(ruta, tipo);
+
+        if (tipo.includes("image")) {
+
+            const textoOCR =
+                await extraerTextoImagen(ruta);
+
+            texto += " " + textoOCR;
+        }
         const resultado = sorter(texto);
 
         db.run(
