@@ -6,6 +6,13 @@ function SearchBar({
     buscar
 }) {
 
+    const handleKeyDown = (e) => {
+
+        if (e.key === "Enter") {
+            buscar();
+        }
+    };
+
     return (
 
         <div className="search-container">
@@ -17,6 +24,7 @@ function SearchBar({
                 onChange={(e) =>
                     setBusqueda(e.target.value)
                 }
+                onKeyDown={handleKeyDown}
             />
 
             <button onClick={buscar}>

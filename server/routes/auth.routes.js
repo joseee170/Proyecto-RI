@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../config/db");
 
+const verificarToken = require("../middleware/auth");
+
 const router = express.Router();
 
 //REGISTRO
@@ -82,5 +84,27 @@ router.post("/login", (req, res) => {
         }
     );
 });
+
+router.get("/me", verificarToken, (req, res) => {
+
+        db.get(
+            `SELECT id, username
+             FROM usuarios
+             WHERE id = ?`,
+            [req.user.id],
+            (err, user) => {
+
+                if (err || !user) {
+
+                    return res.json({
+                        error: "Usuario no encontrado"
+                    });
+                }
+
+                res.json(user);
+            }
+        );
+    }
+);
 
 module.exports = router;

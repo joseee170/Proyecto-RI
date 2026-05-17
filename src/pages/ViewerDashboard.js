@@ -1,6 +1,14 @@
 import "./ViewerDashboard.css";
 
-import { useEffect, useState } from "react";
+import {
+    useEffect,
+    useState
+} from "react";
+
+import {
+    useNavigate
+} from "react-router-dom";
+
 import api from "../api/api";
 
 import SearchBar from "../components/SearchBar";
@@ -8,42 +16,82 @@ import FileCard from "../components/FileCard";
 
 function ViewerDashboard() {
 
-    const [busqueda, setBusqueda] = useState("");
-    const [resultados, setResultados] = useState([]);
+    const navigate =
+        useNavigate();
 
-    const buscar = async (texto = "") => {
+    const [busqueda, setBusqueda] =
+        useState("");
+
+    const [resultados, setResultados] =
+        useState([]);
+
+    const buscar =
+        async (texto = "") => {
 
         try {
 
-            const res = await api.get("/files/buscar-publico", {
-                params: {
-                    q: texto
-                }
-            });
+            const res =
+                await api.get(
+                    "/files/buscar-publico",
+                    {
+                        params: {
+                            q: texto
+                        }
+                    }
+                );
 
-            setResultados(Array.isArray(res.data) ? res.data : []);
+            setResultados(
+                Array.isArray(res.data)
+                    ? res.data
+                    : []
+            );
 
         } catch (error) {
 
             console.log(error);
+
             setResultados([]);
         }
     };
 
     useEffect(() => {
+
         buscar("");
+
     }, []);
 
     return (
 
         <div className="viewer-container">
 
-            <h1>Buscador Multimedia</h1>
+            <div className="viewer-header">
 
-            <p>
-                Busca imágenes, videos,
-                audio y documentos almacenados.
-            </p>
+                <div>
+
+                    <h1>
+                        Buscador Multimedia
+                    </h1>
+
+                    <p>
+                        Busca imágenes, videos,
+                        audio y documentos almacenados.
+                    </p>
+
+                </div>
+
+                <button
+                    className="back-button"
+                    onClick={() => navigate("/")}
+                >
+
+                    <img
+                        src="/icons/volver.png"
+                        alt="volver"
+                        className="back-icon"
+                    />
+                </button>
+
+            </div>
 
             <SearchBar
                 busqueda={busqueda}
@@ -51,24 +99,18 @@ function ViewerDashboard() {
                 buscar={() => buscar(busqueda)}
             />
 
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                        "repeat(auto-fill,minmax(350px,1fr))",
-                    gap: "20px",
-                    marginTop: "20px"
-                }}
-            >
+            <div className="viewer-grid">
 
-                {resultados.map((archivo) => (
+                {
+                    resultados.map((archivo) => (
 
-                    <FileCard
-                        key={archivo.id}
-                        archivo={archivo}
-                    />
+                        <FileCard
+                            key={archivo.id}
+                            archivo={archivo}
+                        />
 
-                ))}
+                    ))
+                }
 
             </div>
 
