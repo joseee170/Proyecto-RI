@@ -1,88 +1,72 @@
 const fs = require("fs");
-
 const pdfParse = require("pdf-parse");
-
 const mammoth = require("mammoth");
-
 const XLSX = require("xlsx");
 
-async function textExtractor(
-    ruta,
-    tipo
-){
+function cleanText(text = "") {
 
-    try{
+    return text
+        .toString()
+        .replace(/\s+/g, " ")
+        .replace(/http\S+/g, "")
+        .replace(/[^\w\sáéíóúÁÉÍÓÚñÑ]/g, " ")
+        .toLowerCase()
+        .trim();
+}
 
-        if(
-            tipo.includes("pdf")
-        ){
+async function textExtractor(ruta, tipo) {
+
+    try {
+
+        let text = "";
+
+        if (tipo.includes("pdf")) {
 
             const dataBuffer =
                 fs.readFileSync(ruta);
 
             const data =
-                await pdfParse(
-                    dataBuffer
-                );
+                await pdfParse(dataBuffer);
 
-            return data.text;
+            text = data.text;
         }
 
-        if(
-            tipo.includes("word")
-            ||
-            tipo.includes(
-                "officedocument"
-            )
-        ){
+        else if (
+            tipo.includes("word") ||
+            tipo.includes("officedocument")
+        ) {
 
             const result =
-                await mammoth.extractRawText(
-                    { path:ruta }
-                );
+                await mammoth.extractRawText({
+                    path: ruta
+                });
 
-            return result.value;
+            text = result.value;
         }
 
-        if(
-            tipo.includes("excel")
-            ||
-            tipo.includes(
-                "spreadsheet"
-            )
-        ){
+        else if (
+            tipo.includes("excel") ||
+            tipo.includes("spreadsheet")
+        ) {
 
             const workbook =
-                XLSX.readFile(
-                    ruta
-                );
+                XLSX.readFile(ruta);
 
-            let texto = "";
+            workbook.SheetNames.forEach(name => {
 
-            workbook.SheetNames.forEach(
-                (sheetName) => {
+                const sheet =
+                    workbook.Sheets[name];
 
-                    const sheet =
-                        workbook.Sheets[
-                            sheetName
-                        ];
-
-                    texto +=
-                        XLSX.utils.sheet_to_csv(
-                            sheet
-                        );
-                }
-            );
-
-            return texto;
+                text +=
+                    XLSX.utils.sheet_to_csv(sheet);
+            });
         }
 
-        return "";
+        return cleanText(text);
 
-    }catch(error){
+    } catch (error) {
 
         console.log(error);
-
         return "";
     }
 }

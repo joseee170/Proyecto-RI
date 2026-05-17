@@ -1,106 +1,84 @@
 const keywordExtractor =
     require("keyword-extractor");
 
-function sorter(
-    texto
-){
+const sinonimos = {
+    tecnologia: [
+        "ia", "ai", "inteligencia artificial",
+        "machine learning", "deep learning",
+        "software", "programacion", "redes",
+        "computadora", "backend", "frontend"
+    ],
+    ciencia: [
+        "biologia", "adn", "genetica",
+        "celula", "quimica", "fisica"
+    ],
+    matematicas: [
+        "algebra", "calculo", "ecuacion",
+        "derivada", "integral", "estadistica"
+    ],
+    medicina: [
+        "hospital", "paciente", "medico",
+        "salud", "diagnostico", "enfermedad"
+    ],
+    historia: [
+        "guerra", "revolucion", "imperio",
+        "civilizacion", "historia"
+    ]
+};
+
+function detectCategory(text = "") {
+
+    text = text.toLowerCase();
+
+    let best = "General";
+    let maxScore = 0;
+
+    for (const category in sinonimos) {
+
+        let score = 0;
+
+        sinonimos[category].forEach(word => {
+
+            if (text.includes(word)) {
+                score++;
+            }
+        });
+
+        if (score > maxScore) {
+            maxScore = score;
+            best = category;
+        }
+    }
+
+    return best;
+}
+
+function sorter(texto) {
 
     const keywords =
-        keywordExtractor.extract(
-            texto,
-            {
-                language:"spanish",
-                remove_digits:true,
-                return_changed_case:true,
-                remove_duplicates:true
-            }
-        );
+        keywordExtractor.extract(texto, {
+            language: "spanish",
+            remove_digits: true,
+            return_changed_case: true,
+            remove_duplicates: true
+        });
 
-    const contenido =
-        texto.toLowerCase();
-
-    let categoria =
-        "General";
-
-    if(
-
-        contenido.includes("inteligencia artificial")
-        ||
-        contenido.includes(
-            "machine learning"
-        )
-        ||
-        contenido.includes(
-            "deep learning"
-        )
-        ||
-        contenido.includes(
-            "red neuronal"
-        )
-
-    ){
-
-        categoria =
-            "Tecnología";
-    }
-
-    else if(
-
-        contenido.includes("biología")
-        ||
-        contenido.includes("adn")
-        ||
-        contenido.includes("genética")
-        ||
-        contenido.includes("célula")
-
-    ){
-
-        categoria =
-            "Ciencia";
-    }
-
-    else if(
-
-        contenido.includes("álgebra")
-        ||
-        contenido.includes("matemática")
-        ||
-        contenido.includes("cálculo")
-
-    ){
-
-        categoria =
-            "Matemáticas";
-    }
-
-    else if(
-
-        contenido.includes("medicina")
-        ||
-        contenido.includes("hospital")
-        ||
-        contenido.includes("paciente")
-
-    ){
-
-        categoria =
-            "Medicina";
-    }
+    const categoria =
+        detectCategory(texto);
 
     const descripcion =
-        texto
-        .substring(0,300);
+        texto.substring(0, 300);
+
+    const cleanKeywords =
+        keywords
+            .filter(k => k.length > 3)
+            .slice(0, 10)
+            .join(", ");
 
     return {
 
         categoria,
-
-        keywords:
-            keywords
-            .slice(0,15)
-            .join(", "),
-
+        keywords: cleanKeywords,
         descripcion
     };
 }
