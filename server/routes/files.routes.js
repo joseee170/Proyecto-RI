@@ -15,7 +15,7 @@ if (!fs.existsSync("./uploads")) {
     fs.mkdirSync("./uploads");
 }
 
-// MULTER CONFIG
+//MULTER CONFIG
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "uploads");
@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ================= UPLOAD =================
+//CARGAR
 router.post("/upload", verificarToken, upload.single("archivo"), async (req, res) => {
 
     try {
@@ -75,7 +75,7 @@ router.post("/upload", verificarToken, upload.single("archivo"), async (req, res
     }
 });
 
-// ================= BUSCAR PRIVADO =================
+//BUSCAR PRIVADO
 router.get("/buscar", verificarToken, (req, res) => {
 
     const q = req.query.q || "";
@@ -106,7 +106,7 @@ router.get("/buscar", verificarToken, (req, res) => {
     );
 });
 
-// ================= BUSCAR PUBLICO =================
+//BUSCAR PUBLICO
 router.get("/buscar-publico", (req, res) => {
 
     const q = req.query.q || "";
@@ -130,7 +130,7 @@ router.get("/buscar-publico", (req, res) => {
     );
 });
 
-// ================= DOWNLOAD =================
+//DESCARGAR
 router.get("/download/:id", (req, res) => {
 
     db.get(
@@ -145,7 +145,7 @@ router.get("/download/:id", (req, res) => {
     );
 });
 
-// ================= DELETE =================
+//ELIMINAR
 router.delete("/eliminar/:id", verificarToken, (req, res) => {
 
     db.get(
