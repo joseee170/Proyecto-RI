@@ -1,8 +1,8 @@
 import "./Register.css";
 
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 
 function Register() {
 
@@ -13,23 +13,27 @@ function Register() {
 
     const register = async () => {
 
-        const res = await axios.post(
-            "http://localhost:3001/register",
-            {
+        try {
+
+            const res = await api.post("/auth/register", {
                 username,
                 password
+            });
+
+            if (res.data.mensaje) {
+
+                alert("Usuario registrado correctamente");
+                navigate("/");
+
+            } else {
+
+                alert(res.data.error);
             }
-        );
 
-        if(res.data.mensaje){
+        } catch (error) {
 
-            alert("Usuario registrado");
-
-            navigate("/");
-        }
-        else{
-
-            alert(res.data.error);
+            console.log(error);
+            alert("Error de conexión con el servidor");
         }
     };
 
@@ -39,16 +43,12 @@ function Register() {
 
             <div className="register-box">
 
-                <h1>
-                    Registro Admin
-                </h1>
+                <h1>Registro Admin</h1>
 
                 <input
                     type="text"
                     placeholder="Usuario"
-                    onChange={(e) =>
-                        setUsername(e.target.value)
-                    }
+                    onChange={(e) => setUsername(e.target.value)}
                 />
 
                 <br /><br />
@@ -56,9 +56,7 @@ function Register() {
                 <input
                     type="password"
                     placeholder="Contraseña"
-                    onChange={(e) =>
-                        setPassword(e.target.value)
-                    }
+                    onChange={(e) => setPassword(e.target.value)}
                 />
 
                 <br /><br />

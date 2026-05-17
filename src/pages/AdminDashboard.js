@@ -1,7 +1,7 @@
 import "./AdminDashboard.css";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/api";
 
 import Navbar from "../components/Navbar";
 import UploadForm from "../components/UploadForm";
@@ -15,34 +15,26 @@ function AdminDashboard() {
 
     const buscar = async () => {
 
-        try{
+        try {
 
-            const res = await axios.get(
-                `http://localhost:3001/buscar?q=${busqueda}`,
-                {
-                    headers:{
-                        Authorization:
-                            localStorage.getItem("token")
-                    }
+            const res = await api.get("/files/buscar", {
+                params: {
+                    q: busqueda
+                },
+                headers: {
+                    Authorization: localStorage.getItem("token")
                 }
-            );
+            });
 
-            setResultados(
-                Array.isArray(res.data)
-                ? res.data
-                : []
-            );
+            setResultados(Array.isArray(res.data) ? res.data : []);
 
-        }catch(error){
-
+        } catch (error) {
             console.log(error);
         }
     };
 
     useEffect(() => {
-
         buscar();
-
     }, []);
 
     return (
@@ -69,18 +61,16 @@ function AdminDashboard() {
 
                 <div className="files-grid">
 
-                    {
-                        resultados.map((archivo) => (
+                    {resultados.map((archivo) => (
 
-                            <FileCard
-                                key={archivo.id}
-                                archivo={archivo}
-                                actualizar={buscar}
-                                admin={true}
-                            />
+                        <FileCard
+                            key={archivo.id}
+                            archivo={archivo}
+                            actualizar={buscar}
+                            admin={true}
+                        />
 
-                        ))
-                    }
+                    ))}
 
                 </div>
 

@@ -1,6 +1,6 @@
 import "./FileCard.css";
 
-import axios from "axios";
+import api from "../api/api";
 
 function FileCard({
     archivo,
@@ -10,35 +10,35 @@ function FileCard({
 
     const eliminar = async () => {
 
-        const confirmar =
-            window.confirm(
-                "¿Eliminar archivo?"
-            );
+        const confirmar = window.confirm("¿Eliminar archivo?");
 
-        if(!confirmar){
-            return;
-        }
+        if (!confirmar) return;
 
-        await axios.delete(
-            `http://localhost:3001/eliminar/${archivo.id}`,
-            {
-                headers:{
-                    Authorization:
-                        localStorage.getItem("token")
+        try {
+
+            await api.delete(`/files/eliminar/${archivo.id}`, {
+                headers: {
+                    Authorization: localStorage.getItem("token")
                 }
-            }
-        );
+            });
 
-        actualizar();
+            actualizar();
+
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const descargar = () => {
 
         window.open(
-            `http://localhost:3001/download/${archivo.id}`,
+            `http://localhost:3001/files/download/${archivo.id}`,
             "_blank"
         );
     };
+
+    // URL correcta del archivo
+    const fileUrl = `http://localhost:3001/${archivo.ruta}`;
 
     return (
 
@@ -52,57 +52,37 @@ function FileCard({
                 {archivo.keywords}
             </div>
 
-            {
-                archivo.tipo.includes("image")
-                &&
-                (
-                    <img
-                        src={`http://localhost:3001/${archivo.ruta}`}
-                        alt=""
-                    />
-                )
-            }
+            {/* IMAGEN */}
+            {archivo.tipo.includes("image") && (
+                <img
+                    src={fileUrl}
+                    alt={archivo.nombre}
+                />
+            )}
 
-            {
-                archivo.tipo.includes("video")
-                &&
-                (
-                    <video controls>
+            {/* VIDEO */}
+            {archivo.tipo.includes("video") && (
+                <video controls>
+                    <source src={fileUrl} />
+                </video>
+            )}
 
-                        <source
-                            src={`http://localhost:3001/${archivo.ruta}`}
-                        />
+            {/* AUDIO */}
+            {archivo.tipo.includes("audio") && (
+                <audio controls>
+                    <source src={fileUrl} />
+                </audio>
+            )}
 
-                    </video>
-                )
-            }
-
-            {
-                archivo.tipo.includes("audio")
-                &&
-                (
-                    <audio controls>
-
-                        <source
-                            src={`http://localhost:3001/${archivo.ruta}`}
-                        />
-
-                    </audio>
-                )
-            }
-
-            {
-                archivo.tipo.includes("pdf")
-                &&
-                (
-                    <iframe
-                        src={`http://localhost:3001/${archivo.ruta}`}
-                        width="100%"
-                        height="400"
-                        title={archivo.nombre}
-                    />
-                )
-            }
+            {/* PDF */}
+            {archivo.tipo.includes("pdf") && (
+                <iframe
+                    src={fileUrl}
+                    width="100%"
+                    height="400px"
+                    title={archivo.nombre}
+                />
+            )}
 
             <br />
 
@@ -113,17 +93,14 @@ function FileCard({
                 Descargar
             </button>
 
-            {
-                admin &&
-                (
-                    <button
-                        className="delete-button"
-                        onClick={eliminar}
-                    >
-                        Eliminar
-                    </button>
-                )
-            }
+            {admin && (
+                <button
+                    className="delete-button"
+                    onClick={eliminar}
+                >
+                    Eliminar
+                </button>
+            )}
 
         </div>
     );

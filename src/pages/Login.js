@@ -1,7 +1,7 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
+import api from "../api/api";
 
 function Login() {
 
@@ -12,26 +12,27 @@ function Login() {
 
     const login = async () => {
 
-        const res = await axios.post(
-            "http://localhost:3001/login",
-            {
+        try {
+
+            const res = await api.post("/auth/login", {
                 username,
                 password
+            });
+
+            if (res.data.token) {
+
+                localStorage.setItem("token", res.data.token);
+                navigate("/admin");
+
+            } else {
+
+                alert(res.data.error);
             }
-        );
 
-        if(res.data.token){
+        } catch (error) {
 
-            localStorage.setItem(
-                "token",
-                res.data.token
-            );
-
-            navigate("/admin");
-        }
-        else{
-
-            alert(res.data.error);
+            console.log(error);
+            alert("Error de conexión");
         }
     };
 
@@ -46,9 +47,7 @@ function Login() {
                 <input
                     type="text"
                     placeholder="Usuario"
-                    onChange={(e) =>
-                        setUsername(e.target.value)
-                    }
+                    onChange={(e) => setUsername(e.target.value)}
                 />
 
                 <br /><br />
@@ -56,9 +55,7 @@ function Login() {
                 <input
                     type="password"
                     placeholder="Contraseña"
-                    onChange={(e) =>
-                        setPassword(e.target.value)
-                    }
+                    onChange={(e) => setPassword(e.target.value)}
                 />
 
                 <br /><br />

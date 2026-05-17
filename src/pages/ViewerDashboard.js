@@ -1,56 +1,44 @@
 import "./ViewerDashboard.css";
 
-import {
-    useEffect,
-    useState,
-    useCallback
-} from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import api from "../api/api";
 
 import SearchBar from "../components/SearchBar";
 import FileCard from "../components/FileCard";
-
 
 function ViewerDashboard() {
 
     const [busqueda, setBusqueda] = useState("");
     const [resultados, setResultados] = useState([]);
 
-    const buscar = useCallback(async () => {
+    const buscar = async (texto = "") => {
 
-        try{
+        try {
 
-            const res = await axios.get(
-                `http://localhost:3001/buscar-publico?q=${busqueda}`
-            );
+            const res = await api.get("/files/buscar-publico", {
+                params: {
+                    q: texto
+                }
+            });
 
-            setResultados(
-                Array.isArray(res.data)
-                ? res.data
-                : []
-            );
+            setResultados(Array.isArray(res.data) ? res.data : []);
 
-        }catch(error){
+        } catch (error) {
 
             console.log(error);
-
             setResultados([]);
         }
-    }, [busqueda]);
+    };
 
     useEffect(() => {
-
-        buscar();
-
+        buscar("");
     }, []);
 
     return (
 
         <div className="viewer-container">
 
-            <h1>
-                Buscador Multimedia
-            </h1>
+            <h1>Buscador Multimedia</h1>
 
             <p>
                 Busca imágenes, videos,
@@ -60,30 +48,27 @@ function ViewerDashboard() {
             <SearchBar
                 busqueda={busqueda}
                 setBusqueda={setBusqueda}
-                buscar={buscar}
+                buscar={() => buscar(busqueda)}
             />
 
             <div
                 style={{
-                    display:"grid",
+                    display: "grid",
                     gridTemplateColumns:
                         "repeat(auto-fill,minmax(350px,1fr))",
-                    gap:"20px",
-                    marginTop:"20px"
+                    gap: "20px",
+                    marginTop: "20px"
                 }}
             >
 
-                {
-                    resultados.map((archivo) => (
+                {resultados.map((archivo) => (
 
-                        <FileCard
-                            key={archivo.id}
-                            archivo={archivo}
-                            actualizar={buscar}
-                        />
+                    <FileCard
+                        key={archivo.id}
+                        archivo={archivo}
+                    />
 
-                    ))
-                }
+                ))}
 
             </div>
 
