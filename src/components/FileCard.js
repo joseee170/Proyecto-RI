@@ -89,7 +89,7 @@ function FileCard({
             </div>
 
             <div className="file-keywords">
-                {archivo.keywords}
+                {archivo.categoria}
             </div>
 
             {/* IMAGEN */}

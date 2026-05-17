@@ -42,7 +42,7 @@ router.post("/upload", verificarToken, upload.single("archivo"), async (req, res
         const tipo = req.file.mimetype;
 
         let texto = await textExtractor(ruta, tipo);
-
+        // IMAGENES
         if (tipo.includes("image")) {
 
             const textoOCR =
@@ -50,6 +50,7 @@ router.post("/upload", verificarToken, upload.single("archivo"), async (req, res
 
             texto += " " + textoOCR;
         }
+
         const resultado = sorter(texto);
 
         db.run(
