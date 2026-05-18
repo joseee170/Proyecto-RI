@@ -2,7 +2,7 @@ const keywordExtractor = require("keyword-extractor");
 
 const sinonimos = {
     tecnologia: [
-        "ia", "ai", "inteligencia artificial",
+        "inteligencia artificial",
         "machine learning", "deep learning",
         "software", "programacion", "redes",
         "computadora", "backend", "frontend"

@@ -9,15 +9,47 @@
     margin-bottom:20px;
 }
 
-.viewer-grid{
+.filters-container {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+}
 
+/* BOTONES */
+.filter-btn {
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgb(141, 139, 139);
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+    font-size: 14px;
+}
+
+/* HOVER SUAVE */
+.filter-btn:hover {
+    background: #ffffff;
+    transform: translateY(-1px);
+    color: #000000;
+}
+
+/* ACTIVO */
+.filter-btn.active {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+/* GRID */
+.viewer-grid{
     display:grid;
-    grid-template-columns:
-        repeat(auto-fill,minmax(350px,1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap:20px;
     margin-top:20px;
 }
 
+/* BOTÓN BACK */
 .back-button{
     background:none;
     border:none;
