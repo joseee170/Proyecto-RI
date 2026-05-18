@@ -133,6 +133,66 @@ router.get("/buscar-publico", (req, res) => {
     );
 });
 
+router.get("/sugerencias", (req, res) => {
+    const q = (req.query.q || "").toLowerCase().trim();
+
+    if (!q || q.length < 2) {
+        return res.json([]);
+    }
+
+    // Busca en nombre, keywords y categoria de todos los archivos
+    const sql = `
+        SELECT nombre, keywords, categoria
+        FROM archivos
+        WHERE
+            LOWER(nombre)    LIKE ? OR
+            LOWER(keywords)  LIKE ? OR
+            LOWER(categoria) LIKE ?
+        LIMIT 50
+    `;
+
+    const param = `%${q}%`;
+    
+    db.all(sql, [param, param, param], (err, rows) => {
+        if (err) return res.json([]);
+
+        // Extraer palabras individuales de todos los campos
+        const palabras = new Set();
+
+        rows.forEach(row => {
+            const campos = [
+                row.nombre    || "",
+                row.keywords  || "",
+                row.categoria || ""
+            ].join(" ");
+
+            campos
+                .toLowerCase()
+                .split(/[\s,]+/)
+                .filter(p => p.length > 2 && p.includes(q))
+                .forEach(p => palabras.add(p));
+        });
+
+        // También agregar títulos completos si contienen la query
+        rows.forEach(row => {
+            if (row.nombre && row.nombre.toLowerCase().includes(q)) {
+                palabras.add(row.nombre.toLowerCase());
+            }
+        });
+
+        const sugerencias = Array.from(palabras)
+            .sort((a, b) => {
+                // Priorizar las que empiezan con la query
+                const aEmpieza = a.startsWith(q) ? 0 : 1;
+                const bEmpieza = b.startsWith(q) ? 0 : 1;
+                return aEmpieza - bEmpieza || a.localeCompare(b);
+            })
+            .slice(0, 8);
+
+        res.json(sugerencias);
+    });
+});
+
 //DESCARGAR
 router.get("/download/:id", (req, res) => {
 

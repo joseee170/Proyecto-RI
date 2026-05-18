@@ -72,7 +72,7 @@ function ViewerDashboard() {
                     <img src="/icons/volver.png" alt="volver" className="back-icon" />
                 </button>
             </div>
-            
+
             <SearchBar
                 busqueda={busqueda}
                 setBusqueda={setBusqueda}

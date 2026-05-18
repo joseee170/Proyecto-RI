@@ -1,11 +1,6 @@
-const {
-    inverseDocumentFrequency,
-    tfidfVector
-} = require("./tfidf");
-
+const { inverseDocumentFrequency, tfidfVector } = require("./tfidf");
 const cosineSimilarity = require("./similarity");
 
-// Cache del IDF para evitar recalcular en cada búsqueda
 let _cachedIdf = null;
 let _cachedCorpusKey = null;
 
@@ -13,58 +8,67 @@ function normalize(text = "") {
     return text
         .toLowerCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
 }
 
-// Boost proporcional y acotado (máx 0.5) para no dominar el score coseno
-function categoryBoost(query, category) {
-    if (!query || !category) return 0;
+// Boost por coincidencia en campos clave (nombre, keywords, categoria)
+function camposBoost(query, doc) {
+    const q = normalize(query);
+    let boost = 0;
 
-    const q = normalize(query.trim());
-    const c = normalize(category.trim());
+    const nombre    = normalize(doc.nombre    || "");
+    const keywords  = normalize(doc.keywords  || "");
+    const categoria = normalize(doc.categoria || "");
 
-    if (c === q) return 0.5;       // match exacto
-    if (c.includes(q)) return 0.3; // match parcial
-    return 0;
+    // Nombre exacto: máxima prioridad
+    if (nombre === q)               boost += 2.0;
+    // Nombre contiene la query
+    else if (nombre.includes(q))    boost += 1.0;
+
+    // Keywords contienen la query
+    if (keywords.includes(q))       boost += 0.5;
+
+    // Categoría coincide
+    if (categoria === q)            boost += 0.4;
+    else if (categoria.includes(q)) boost += 0.2;
+
+    return boost;
 }
 
+// Construye el texto que representa a cada documento para TF-IDF
+// Usa 'nombre' (no 'titulo') que es como se llama la columna en la BD
 function buildCorpus(documents) {
     return documents.map(doc =>
         normalize(
-            (doc.titulo || "") + " " +
-            (doc.descripcion || "") + " " +
-            (doc.keywords || "") + " " +
-            (doc.categoria || "")
+            (doc.nombre      || "") + " " +
+            (doc.keywords    || "") + " " +
+            (doc.categoria   || "") + " " +
+            (doc.descripcion || "")
         )
     );
 }
 
 function getIdf(corpus) {
     const key = corpus.join("|");
-
-    if (_cachedIdf && key === _cachedCorpusKey) {
-        return _cachedIdf;
-    }
-
+    if (_cachedIdf && key === _cachedCorpusKey) return _cachedIdf;
     _cachedCorpusKey = key;
     _cachedIdf = inverseDocumentFrequency(corpus);
-
     return _cachedIdf;
 }
 
 function tfidfSearch(query, documents) {
-    if (!query || !query.trim()) {
-        return documents;
-    }
+    if (!query || !query.trim()) return documents;
 
+    const q = normalize(query);
     const corpus = buildCorpus(documents);
     const idf = getIdf(corpus);
-    const queryVec = tfidfVector(normalize(query), idf);
+    const queryVec = tfidfVector(q, idf);
 
     const results = documents.map((doc, i) => {
-        const docVec = tfidfVector(corpus[i], idf);
+        const docVec     = tfidfVector(corpus[i], idf);
         const tfidfScore = cosineSimilarity(queryVec, docVec);
-        const boost = categoryBoost(query, doc.categoria);
+        const boost      = camposBoost(query, doc);
 
         return {
             ...doc,
@@ -77,7 +81,6 @@ function tfidfSearch(query, documents) {
         .filter(r => r.score > 0);
 }
 
-// Permite invalidar el cache manualmente cuando cambia el corpus
 function invalidateCache() {
     _cachedIdf = null;
     _cachedCorpusKey = null;

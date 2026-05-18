@@ -59,7 +59,9 @@
 }
 
 .back-button:hover{
-    transform:scale(1.1);
+    background: #ffffff;
+    transform: translateY(-1px);
+    color: #000000;
 }
 
 .back-icon{

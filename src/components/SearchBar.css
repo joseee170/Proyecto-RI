@@ -1,9 +1,85 @@
-.search-container{
-    display:flex;
-    gap:10px;
-    margin-bottom:30px;
+/* ── Wrapper posiciona el dropdown ── */
+.search-wrapper {
+    position: relative;
+    margin-bottom: 20px;
 }
 
-.search-container input{
-    flex:1;
+/* ── Fila input + botón ── */
+.search-container {
+    display: flex;
+    gap: 10px;
+}
+
+.search-container input {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-container input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ── Dropdown de sugerencias ── */
+.sugerencias-lista {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    list-style: none;
+    margin: 0;
+    padding: 6px 0;
+    z-index: 1000;
+    animation: fadeIn 0.12s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Cada fila ── */
+.sugerencia-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #111827;
+    transition: background 0.1s;
+}
+
+.sugerencia-item:hover,
+.sugerencia-item.activo {
+    background: #f3f4f6;
+}
+
+/* ── Icono lupa ── */
+.sugerencia-icono {
+    font-size: 13px;
+    opacity: 0.45;
+    flex-shrink: 0;
+}
+
+/* ── Texto coincidente en negrita ── */
+.sugerencia-item strong {
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.sugerencia-icono {
+    width: 16px;
+    height: 16px;
+    opacity: 0.45;
+    flex-shrink: 0;
 }

@@ -57,6 +57,7 @@ function Register() {
                     type="password"
                     placeholder="Contraseña"
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && register()}
                 />
 
                 <br /><br />
