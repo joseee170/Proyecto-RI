@@ -1,10 +1,9 @@
-const fs = require("fs");
+const fs = require("fs").promises; // async: no bloquea el event loop
 const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
 const XLSX = require("xlsx");
 
 function cleanText(text = "") {
-
     return text
         .toString()
         .replace(/\s+/g, " ")
@@ -15,19 +14,12 @@ function cleanText(text = "") {
 }
 
 async function textExtractor(ruta, tipo) {
-
     try {
-
         let text = "";
 
         if (tipo.includes("pdf")) {
-
-            const dataBuffer =
-                fs.readFileSync(ruta);
-
-            const data =
-                await pdfParse(dataBuffer);
-
+            const dataBuffer = await fs.readFile(ruta); // ✅ async
+            const data = await pdfParse(dataBuffer);
             text = data.text;
         }
 
@@ -35,12 +27,7 @@ async function textExtractor(ruta, tipo) {
             tipo.includes("word") ||
             tipo.includes("officedocument")
         ) {
-
-            const result =
-                await mammoth.extractRawText({
-                    path: ruta
-                });
-
+            const result = await mammoth.extractRawText({ path: ruta });
             text = result.value;
         }
 
@@ -48,28 +35,22 @@ async function textExtractor(ruta, tipo) {
             tipo.includes("excel") ||
             tipo.includes("spreadsheet")
         ) {
-
-            const workbook =
-                XLSX.readFile(ruta);
+            // XLSX no soporta promesas nativas, pero la lectura es rápida
+            const buffer = await fs.readFile(ruta);
+            const workbook = XLSX.read(buffer, { type: "buffer" });
 
             workbook.SheetNames.forEach(name => {
-
-                const sheet =
-                    workbook.Sheets[name];
-
-                text +=
-                    XLSX.utils.sheet_to_csv(sheet);
+                const sheet = workbook.Sheets[name];
+                text += XLSX.utils.sheet_to_csv(sheet) + "\n";
             });
         }
 
         return cleanText(text);
 
     } catch (error) {
-
-        console.log(error);
+        console.error("[textExtractor] Error al procesar:", ruta, error.message);
         return "";
     }
 }
 
-module.exports =
-    textExtractor;
+module.exports = textExtractor;

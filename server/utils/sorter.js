@@ -1,5 +1,4 @@
-const keywordExtractor =
-    require("keyword-extractor");
+const keywordExtractor = require("keyword-extractor");
 
 const sinonimos = {
     tecnologia: [
@@ -26,62 +25,68 @@ const sinonimos = {
     ]
 };
 
-function detectCategory(text = "") {
+function normalizeText(text = "") {
+    return text
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, ""); // elimina acentos antes de comparar
+}
 
-    text = text.toLowerCase();
+function detectCategory(text = "") {
+    const normalized = normalizeText(text);
 
     let best = "General";
     let maxScore = 0;
 
     for (const category in sinonimos) {
-
         let score = 0;
 
         sinonimos[category].forEach(word => {
-
-            if (text.includes(word)) {
+            // normalizar también las palabras del diccionario
+            if (normalized.includes(normalizeText(word))) {
                 score++;
             }
         });
 
+        // desempate: si hay empate, mantiene la categoría previa (más específica)
         if (score > maxScore) {
             maxScore = score;
             best = category;
         }
     }
 
-    return best;
+    return { categoria: best, confianza: maxScore };
 }
 
 function sorter(texto) {
+    const keywords = keywordExtractor.extract(texto, {
+        language: "spanish",
+        remove_digits: true,
+        return_changed_case: true,
+        remove_duplicates: true
+    });
 
-    const keywords =
-        keywordExtractor.extract(texto, {
-            language: "spanish",
-            remove_digits: true,
-            return_changed_case: true,
-            remove_duplicates: true
-        });
+    const { categoria, confianza } = detectCategory(texto);
 
-    const categoria =
-        detectCategory(texto);
+    // Cortar descripción en límite de palabra, sin romper palabras a la mitad
+    const MAX_DESC = 300;
+    let descripcion = texto;
+    if (texto.length > MAX_DESC) {
+        const corte = texto.lastIndexOf(" ", MAX_DESC);
+        descripcion = texto.substring(0, corte > 0 ? corte : MAX_DESC) + "...";
+    }
 
-    const descripcion =
-        texto.substring(0, 300);
-
-    const cleanKeywords =
-        keywords
-            .filter(k => k.length > 3)
-            .slice(0, 10)
-            .join(", ");
+    const cleanKeywords = keywords
+        .filter(k => k.length > 3)
+        .slice(0, 10)
+        .join(", ");
 
     return {
-
         categoria,
+        confianza,   // útil para decidir si la categoría es confiable
         keywords: cleanKeywords,
         descripcion
     };
 }
 
-module.exports =
-    sorter;
+module.exports = sorter;

@@ -9,6 +9,7 @@ const verificarToken = require("../middleware/auth");
 const textExtractor = require("../utils/textExtractor");
 const sorter = require("../utils/sorter");
 const extraerTextoImagen = require("../utils/ocr");
+const {tfidfSearch} = require("../utils/searchEngine");
 
 const router = express.Router();
 
@@ -91,27 +92,21 @@ router.get("/buscar", verificarToken, (req, res) => {
     const q = req.query.q || "";
 
     db.all(
-        `SELECT * FROM archivos
-         WHERE usuario_id = ?
-         AND (
-            nombre LIKE ?
-            OR keywords LIKE ?
-            OR categoria LIKE ?
-            OR descripcion LIKE ?
-         )`,
-        [
-            req.user.id,
-            `%${q}%`,
-            `%${q}%`,
-            `%${q}%`,
-            `%${q}%`
-        ],
+        `SELECT * FROM archivos WHERE usuario_id = ?`,
+        [req.user.id],
         (err, rows) => {
+
             if (err) {
                 console.log(err);
                 return res.json([]);
             }
-            res.json(rows);
+
+            if (!q.trim()) {
+                return res.json(rows);
+            }
+
+            const results = tfidfSearch(q, rows);
+            return res.json(results);
         }
     );
 });
@@ -122,20 +117,18 @@ router.get("/buscar-publico", (req, res) => {
     const q = req.query.q || "";
 
     db.all(
-        `SELECT * FROM archivos
-         WHERE nombre LIKE ?
-         OR keywords LIKE ?
-         OR categoria LIKE ?
-         OR descripcion LIKE ?`,
-        [
-            `%${q}%`,
-            `%${q}%`,
-            `%${q}%`,
-            `%${q}%`
-        ],
+        `SELECT * FROM archivos`,
+        [],
         (err, rows) => {
+
             if (err) return res.json([]);
-            res.json(rows);
+
+            if (!q.trim()) {
+                return res.json(rows);
+            }
+
+            const results = tfidfSearch(q, rows);
+            return res.json(results);
         }
     );
 });
