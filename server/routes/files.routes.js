@@ -511,4 +511,69 @@ router.delete(
     }
 );
 
+router.get("/preview/:id", (req, res) => {
+    db.get(`SELECT * FROM archivos WHERE id = ?`, [req.params.id], async (err, row) => {
+        if (!row) return res.json({ error: "Archivo no encontrado" });
+
+        const ext = row.nombre.split(".").pop().toLowerCase();
+
+        try {
+            // ── PDF: devuelve la URL para mostrarla en iframe ──
+            if (ext === "pdf") {
+                return res.json({
+                    tipo: "pdf",
+                    url: `http://localhost:3001/${row.ruta}`
+                });
+            }
+
+            // ── Word .docx ──
+            if (ext === "docx") {
+                const mammoth = require("mammoth");
+                const result  = await mammoth.convertToHtml({ path: row.ruta });
+                return res.json({ tipo: "html", html: result.value });
+            }
+
+            // ── Word .doc (formato antiguo) ──
+            if (ext === "doc") {
+                const WordExtractor = require("word-extractor");
+                const extractor     = new WordExtractor();
+                const doc           = await extractor.extract(row.ruta);
+                const texto         = doc.getBody() || "";
+                // Convertir saltos de línea a párrafos HTML
+                const html = texto
+                    .split(/\n+/)
+                    .filter(l => l.trim())
+                    .map(l => `<p>${l}</p>`)
+                    .join("");
+                return res.json({ tipo: "html", html });
+            }
+
+            // ── Excel ──
+            if (ext === "xlsx" || ext === "xls") {
+                const XLSX     = require("xlsx");
+                const workbook = XLSX.readFile(row.ruta);
+                // Generar una pestaña por cada hoja
+                const hojas = workbook.SheetNames.map(name => {
+                    const sheet = workbook.Sheets[name];
+                    const html  = XLSX.utils.sheet_to_html(sheet);
+                    return `<h3 style="margin:16px 0 8px;color:#1d4ed8">${name}</h3>${html}`;
+                }).join("<hr/>");
+                return res.json({ tipo: "html", html: hojas });
+            }
+
+            // ── PowerPoint ──
+            if (ext === "pptx" || ext === "ppt") {
+                return res.json({ tipo: "pptx" });
+            }
+
+            return res.json({ error: "Formato no soportado" });
+
+        } catch (e) {
+            console.error("[preview]", e.message);
+            return res.json({ error: "Error al generar la previsualización: " + e.message });
+        }
+    });
+});
+
+
 module.exports = router;

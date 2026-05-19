@@ -31,12 +31,6 @@ async function textExtractor(ruta, tipo) {
             const dataBuffer = await fs.readFile(ruta);
             const data = await pdfParse(dataBuffer);
             text = data.text || "";
-
-            // Si el PDF tiene poco texto, probablemente está escaneado → OCR
-            if (cleanText(text).length < MIN_TEXTO_DIGITAL) {
-                console.log("[textExtractor] PDF sin texto digital, aplicando OCR...");
-                text = await extraerTextoImagen(ruta);
-            }
         }
         // ── WORD ──
         else if (

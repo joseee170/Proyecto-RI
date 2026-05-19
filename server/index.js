@@ -15,6 +15,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/auth", require("./routes/auth.routes"));
 app.use("/files", require("./routes/files.routes"));
 
-app.listen(3001, () => {
-    console.log("Servidor corriendo en puerto 3001");
+app.listen(3001, "0.0.0.0", () => {
+
+    console.log(
+        "Servidor corriendo"
+    );
 });
