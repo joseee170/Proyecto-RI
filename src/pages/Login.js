@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import "./Login.css";
 import api from "../api/api";
 
@@ -8,31 +9,53 @@ function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    const [mensaje, setMensaje] = useState("");
+    const [error, setError] = useState("");
+
     const navigate = useNavigate();
 
     const login = async () => {
 
         try {
 
+            // LIMPIAR MENSAJES
+            setMensaje("");
+            setError("");
+
             const res = await api.post("/auth/login", {
                 username,
                 password
             });
 
+            // LOGIN EXITOSO
             if (res.data.token) {
 
-                localStorage.setItem("token", res.data.token);
-                navigate("/admin");
+                localStorage.setItem(
+                    "token",
+                    res.data.token
+                );
+
+                setMensaje("Inicio de sesión correcto");
+
+                setTimeout(() => {
+
+                    navigate("/admin");
+
+                }, 1000);
 
             } else {
 
-                alert(res.data.error);
+                setError(
+                    res.data.error ||
+                    "Error al iniciar sesión"
+                );
             }
 
         } catch (error) {
 
             console.log(error);
-            alert("Error de conexión");
+
+            setError("Error de conexión");
         }
     };
 
@@ -47,7 +70,10 @@ function Login() {
                 <input
                     type="text"
                     placeholder="Usuario"
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={username}
+                    onChange={(e) =>
+                        setUsername(e.target.value)
+                    }
                 />
 
                 <br /><br />
@@ -55,19 +81,50 @@ function Login() {
                 <input
                     type="password"
                     placeholder="Contraseña"
-                    onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && login()}
+                    value={password}
+                    onChange={(e) =>
+                        setPassword(e.target.value)
+                    }
+                    onKeyDown={(e) =>
+                        e.key === "Enter" && login()
+                    }
                 />
 
                 <br /><br />
 
+                {/* MENSAJE EXITO */}
+                {mensaje && (
+
+                    <div className="success-msg">
+
+                        {mensaje}
+
+                    </div>
+                )}
+
+                {/* MENSAJE ERROR */}
+                {error && (
+
+                    <div className="error-msg">
+
+                        {error}
+
+                    </div>
+                )}
+
+                <br />
+
                 <button onClick={login}>
+
                     Ingresar
+
                 </button>
 
                 <p
                     className="link"
-                    onClick={() => navigate("/register")}
+                    onClick={() =>
+                        navigate("/register")
+                    }
                 >
                     Crear cuenta
                 </p>
@@ -76,7 +133,9 @@ function Login() {
 
                 <p
                     className="link"
-                    onClick={() => navigate("/viewer")}
+                    onClick={() =>
+                        navigate("/viewer")
+                    }
                 >
                     Entrar como visitante
                 </p>

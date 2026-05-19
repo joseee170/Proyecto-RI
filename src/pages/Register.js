@@ -2,6 +2,7 @@ import "./Register.css";
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import api from "../api/api";
 
 function Register() {
@@ -9,31 +10,56 @@ function Register() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    const [mensaje, setMensaje] = useState("");
+    const [error, setError] = useState("");
+
     const navigate = useNavigate();
 
     const register = async () => {
 
         try {
 
-            const res = await api.post("/auth/register", {
-                username,
-                password
-            });
+            // LIMPIAR MENSAJES
+            setMensaje("");
+            setError("");
 
+            const res = await api.post(
+                "/auth/register",
+                {
+                    username,
+                    password
+                }
+            );
+
+            // REGISTRO EXITOSO
             if (res.data.mensaje) {
 
-                alert("Usuario registrado correctamente");
-                navigate("/");
+                setMensaje(
+                    "Usuario registrado correctamente"
+                );
+
+                // REDIRECCIONAR
+                setTimeout(() => {
+
+                    navigate("/");
+
+                }, 1500);
 
             } else {
 
-                alert(res.data.error);
+                setError(
+                    res.data.error ||
+                    "No se pudo registrar"
+                );
             }
 
         } catch (error) {
 
             console.log(error);
-            alert("Error de conexión con el servidor");
+
+            setError(
+                "Error de conexión con el servidor"
+            );
         }
     };
 
@@ -48,7 +74,10 @@ function Register() {
                 <input
                     type="text"
                     placeholder="Usuario"
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={username}
+                    onChange={(e) =>
+                        setUsername(e.target.value)
+                    }
                 />
 
                 <br /><br />
@@ -56,21 +85,53 @@ function Register() {
                 <input
                     type="password"
                     placeholder="Contraseña"
-                    onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && register()}
+                    value={password}
+                    onChange={(e) =>
+                        setPassword(e.target.value)
+                    }
+                    onKeyDown={(e) =>
+                        e.key === "Enter" &&
+                        register()
+                    }
                 />
 
                 <br /><br />
 
+                {/* MENSAJE EXITO */}
+                {mensaje && (
+
+                    <div className="success-msg">
+
+                        {mensaje}
+
+                    </div>
+                )}
+
+                {/* MENSAJE ERROR */}
+                {error && (
+
+                    <div className="error-msg">
+
+                        {error}
+
+                    </div>
+                )}
+
+                <br />
+
                 <button onClick={register}>
+
                     Registrarse
+
                 </button>
 
                 <br /><br />
 
                 <p
                     className="link"
-                    onClick={() => navigate("/")}
+                    onClick={() =>
+                        navigate("/")
+                    }
                 >
                     Ir al login
                 </p>

@@ -9,109 +9,320 @@ const verificarToken = require("../middleware/auth");
 const textExtractor = require("../utils/textExtractor");
 const sorter = require("../utils/sorter");
 const extraerTextoImagen = require("../utils/ocr");
-const {tfidfSearch} = require("../utils/searchEngine");
+const { tfidfSearch } = require("../utils/searchEngine");
 
 const router = express.Router();
 
+// CREAR CARPETA UPLOADS SI NO EXISTE
 if (!fs.existsSync("./uploads")) {
     fs.mkdirSync("./uploads");
 }
 
-//MULTER CONFIG
+// =========================
+// MULTER CONFIG
+// =========================
+
 const storage = multer.diskStorage({
+
     destination: (req, file, cb) => {
         cb(null, "uploads");
     },
+
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+
+        const uniqueName =
+            Date.now() + path.extname(file.originalname);
+
+        cb(null, uniqueName);
     }
 });
 
-const upload = multer({ storage });
+// MIME TYPES PERMITIDOS
+const allowedMimeTypes = [
 
-//CARGAR
-router.post("/upload", verificarToken, upload.single("archivo"), async (req, res) => {
+    // PDF
+    "application/pdf",
 
-    try {
+    // WORD
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 
-        if (!req.file) {
-            return res.json({ error: "No se recibió archivo" });
+    // EXCEL
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+    // POWERPOINT
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+
+    // IMAGENES
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+
+    // VIDEOS
+    "video/mp4",
+    "video/webm",
+    "video/ogg",
+
+    // AUDIOS
+    "audio/mpeg",
+    "audio/wav",
+    "audio/ogg",
+    "audio/mp4",
+    "audio/x-m4a"
+];
+
+// EXTENSIONES PERMITIDAS
+const allowedExtensions = [
+
+    ".pdf",
+
+    ".doc",
+    ".docx",
+
+    ".xls",
+    ".xlsx",
+
+    ".ppt",
+    ".pptx",
+
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".gif",
+
+    ".mp4",
+    ".webm",
+    ".ogg",
+
+    ".mp3",
+    ".wav",
+    ".m4a"
+];
+
+// CONFIG MULTER
+const upload = multer({
+
+    storage,
+
+    fileFilter: (req, file, cb) => {
+
+        const tipo = file.mimetype;
+
+        const ext =
+            path.extname(file.originalname).toLowerCase();
+
+        const mimeValido =
+            allowedMimeTypes.includes(tipo);
+
+        const extensionValida =
+            allowedExtensions.includes(ext);
+
+        if (mimeValido && extensionValida) {
+
+            cb(null, true);
+
+        } else {
+
+            cb(
+                new Error("Tipo de archivo no permitido"),
+                false
+            );
         }
+    },
 
-        const nombre = req.file.originalname;
-        const ruta = req.file.path.replace(/\\/g, "/");
-        const tipo = req.file.mimetype;
+    limits: {
+        fileSize: 1024 * 1024 * 200 // 200MB
+    }
+});
 
-        let texto = await textExtractor(ruta, tipo);
-        // IMAGENES
-        if (tipo.includes("image")) {
+// =========================
+// SUBIR ARCHIVO
+// =========================
 
-            const textoOCR =
-                await extraerTextoImagen(ruta);
+router.post(
+    "/upload",
+    verificarToken,
+    upload.single("archivo"),
+    async (req, res) => {
 
-            texto += " " + textoOCR;
+        try {
+
+            if (!req.file) {
+
+                return res.json({
+                    error: "No se recibió archivo"
+                });
+            }
+
+            const nombre = req.file.originalname;
+
+            const ruta =
+                req.file.path.replace(/\\/g, "/");
+
+            const tipo = req.file.mimetype;
+
+            let texto = "";
+
+            // EXTRAER TEXTO SOLO DE DOCUMENTOS
+            try {
+
+                texto = await textExtractor(ruta, tipo);
+
+            } catch (e) {
+
+                console.log(
+                    "No se pudo extraer texto:",
+                    e.message
+                );
+            }
+
+            // OCR PARA IMAGENES
+            if (tipo.includes("image")) {
+
+                try {
+
+                    const textoOCR =
+                        await extraerTextoImagen(ruta);
+
+                    texto += " " + textoOCR;
+
+                } catch (e) {
+
+                    console.log(
+                        "Error OCR:",
+                        e.message
+                    );
+                }
+            }
+
+            function categoriaBase(tipo, nombre) {
+                const ext = path.extname(nombre).toLowerCase();
+
+                if (tipo.includes("image"))                                     return "Imagen";
+                if (tipo.includes("video"))                                     return "Video";
+                if (tipo.includes("audio"))                                     return "Audio";
+                if (tipo.includes("pdf") || ext === ".pdf")                     return "Documento";
+                if (ext === ".doc"  || ext === ".docx" ||
+                    tipo.includes("wordprocessingml") || tipo.includes("msword")) return "Documento";
+                if (ext === ".xls"  || ext === ".xlsx" ||
+                    tipo.includes("spreadsheetml") || tipo.includes("ms-excel")) return "Hoja de cálculo";
+                if (ext === ".ppt"  || ext === ".pptx" ||
+                    tipo.includes("presentationml") || tipo.includes("ms-powerpoint")) return "Presentación";
+
+                return "General";
+            }
+
+            // Clasificar solo si hay texto, si no usar la categoría base
+            let resultado = {
+                categoria: categoriaBase(tipo, nombre),
+                keywords: "",
+                descripcion: nombre,
+            };
+
+            if (texto && texto.trim().length > 10) {
+                resultado = sorter(texto);
+            }
+
+            if (texto && texto.trim().length > 10) {
+
+                resultado = sorter(texto);
+            }
+
+            // GUARDAR EN DB
+            db.run(
+                `INSERT INTO archivos(
+                    nombre,
+                    ruta,
+                    tipo,
+                    keywords,
+                    categoria,
+                    descripcion,
+                    usuario_id
+                ) VALUES (?,?,?,?,?,?,?)`,
+                [
+                    nombre,
+                    ruta,
+                    tipo,
+                    resultado.keywords,
+                    resultado.categoria,
+                    resultado.descripcion,
+                    req.user.id
+                ],
+                (err) => {
+
+                    if (err) {
+
+                        console.log(err);
+
+                        return res.json({
+                            error: "Error SQL"
+                        });
+                    }
+
+                    res.json({
+                        mensaje:
+                            "Archivo subido correctamente"
+                    });
+                }
+            );
+
+        } catch (error) {
+
+            console.log(error);
+
+            res.json({
+                error: "Error upload"
+            });
         }
+    }
+);
 
-        const resultado = sorter(texto);
+// =========================
+// BUSCAR PRIVADO
+// =========================
 
-        db.run(
-            `INSERT INTO archivos(
-                nombre, ruta, tipo,
-                keywords, categoria, descripcion,
-                usuario_id
-            ) VALUES (?,?,?,?,?,?,?)`,
-            [
-                nombre,
-                ruta,
-                tipo,
-                resultado.keywords,
-                resultado.categoria,
-                resultado.descripcion,
-                req.user.id
-            ],
-            (err) => {
+router.get(
+    "/buscar",
+    verificarToken,
+    (req, res) => {
+
+        const q = req.query.q || "";
+
+        db.all(
+            `SELECT * FROM archivos
+             WHERE usuario_id = ?`,
+            [req.user.id],
+            (err, rows) => {
 
                 if (err) {
+
                     console.log(err);
-                    return res.json({ error: "Error SQL" });
+
+                    return res.json([]);
                 }
 
-                res.json({ mensaje: "Archivo subido correctamente" });
+                if (!q.trim()) {
+
+                    return res.json(rows);
+                }
+
+                const results =
+                    tfidfSearch(q, rows);
+
+                return res.json(results);
             }
         );
-
-    } catch (error) {
-        console.log(error);
-        res.json({ error: "Error upload" });
     }
-});
+);
 
-//BUSCAR PRIVADO
-router.get("/buscar", verificarToken, (req, res) => {
+// =========================
+// BUSCAR PUBLICO
+// =========================
 
-    const q = req.query.q || "";
-
-    db.all(
-        `SELECT * FROM archivos WHERE usuario_id = ?`,
-        [req.user.id],
-        (err, rows) => {
-
-            if (err) {
-                console.log(err);
-                return res.json([]);
-            }
-
-            if (!q.trim()) {
-                return res.json(rows);
-            }
-
-            const results = tfidfSearch(q, rows);
-            return res.json(results);
-        }
-    );
-});
-
-//BUSCAR PUBLICO
 router.get("/buscar-publico", (req, res) => {
 
     const q = req.query.q || "";
@@ -124,23 +335,34 @@ router.get("/buscar-publico", (req, res) => {
             if (err) return res.json([]);
 
             if (!q.trim()) {
+
                 return res.json(rows);
             }
 
-            const results = tfidfSearch(q, rows);
+            const results =
+                tfidfSearch(q, rows);
+
             return res.json(results);
         }
     );
 });
 
+// =========================
+// SUGERENCIAS
+// =========================
+
 router.get("/sugerencias", (req, res) => {
-    const q = (req.query.q || "").toLowerCase().trim();
+
+    const q =
+        (req.query.q || "")
+            .toLowerCase()
+            .trim();
 
     if (!q || q.length < 2) {
+
         return res.json([]);
     }
 
-    // Busca en nombre, keywords y categoria de todos los archivos
     const sql = `
         SELECT nombre, keywords, categoria
         FROM archivos
@@ -152,48 +374,78 @@ router.get("/sugerencias", (req, res) => {
     `;
 
     const param = `%${q}%`;
-    
-    db.all(sql, [param, param, param], (err, rows) => {
-        if (err) return res.json([]);
 
-        // Extraer palabras individuales de todos los campos
-        const palabras = new Set();
+    db.all(
+        sql,
+        [param, param, param],
+        (err, rows) => {
 
-        rows.forEach(row => {
-            const campos = [
-                row.nombre    || "",
-                row.keywords  || "",
-                row.categoria || ""
-            ].join(" ");
+            if (err) return res.json([]);
 
-            campos
-                .toLowerCase()
-                .split(/[\s,]+/)
-                .filter(p => p.length > 2 && p.includes(q))
-                .forEach(p => palabras.add(p));
-        });
+            const palabras = new Set();
 
-        // También agregar títulos completos si contienen la query
-        rows.forEach(row => {
-            if (row.nombre && row.nombre.toLowerCase().includes(q)) {
-                palabras.add(row.nombre.toLowerCase());
-            }
-        });
+            rows.forEach(row => {
 
-        const sugerencias = Array.from(palabras)
-            .sort((a, b) => {
-                // Priorizar las que empiezan con la query
-                const aEmpieza = a.startsWith(q) ? 0 : 1;
-                const bEmpieza = b.startsWith(q) ? 0 : 1;
-                return aEmpieza - bEmpieza || a.localeCompare(b);
-            })
-            .slice(0, 8);
+                const campos = [
+                    row.nombre || "",
+                    row.keywords || "",
+                    row.categoria || ""
+                ].join(" ");
 
-        res.json(sugerencias);
-    });
+                campos
+                    .toLowerCase()
+                    .split(/[\s,]+/)
+                    .filter(
+                        p =>
+                            p.length > 2 &&
+                            p.includes(q)
+                    )
+                    .forEach(
+                        p => palabras.add(p)
+                    );
+            });
+
+            rows.forEach(row => {
+
+                if (
+                    row.nombre &&
+                    row.nombre
+                        .toLowerCase()
+                        .includes(q)
+                ) {
+
+                    palabras.add(
+                        row.nombre.toLowerCase()
+                    );
+                }
+            });
+
+            const sugerencias =
+                Array.from(palabras)
+                    .sort((a, b) => {
+
+                        const aEmpieza =
+                            a.startsWith(q) ? 0 : 1;
+
+                        const bEmpieza =
+                            b.startsWith(q) ? 0 : 1;
+
+                        return (
+                            aEmpieza - bEmpieza ||
+                            a.localeCompare(b)
+                        );
+                    })
+                    .slice(0, 8);
+
+            res.json(sugerencias);
+        }
+    );
 });
 
-//DESCARGAR
+// =========================
+// DESCARGAR
+// =========================
+
 router.get("/download/:id", (req, res) => {
 
     db.get(
@@ -201,31 +453,62 @@ router.get("/download/:id", (req, res) => {
         [req.params.id],
         (err, row) => {
 
-            if (!row) return res.json({ error: "No encontrado" });
+            if (!row) {
 
-            res.download(row.ruta, row.nombre);
+                return res.json({
+                    error: "No encontrado"
+                });
+            }
+
+            res.download(
+                row.ruta,
+                row.nombre
+            );
         }
     );
 });
 
-//ELIMINAR
-router.delete("/eliminar/:id", verificarToken, (req, res) => {
+// =========================
+// ELIMINAR
+// =========================
 
-    db.get(
-        `SELECT * FROM archivos WHERE id = ? AND usuario_id = ?`,
-        [req.params.id, req.user.id],
-        (err, row) => {
+router.delete(
+    "/eliminar/:id",
+    verificarToken,
+    (req, res) => {
 
-            if (!row) return res.json({ error: "No encontrado" });
+        db.get(
+            `SELECT * FROM archivos
+             WHERE id = ?
+             AND usuario_id = ?`,
+            [
+                req.params.id,
+                req.user.id
+            ],
+            (err, row) => {
 
-            fs.unlink(row.ruta, () => {
+                if (!row) {
 
-                db.run(`DELETE FROM archivos WHERE id = ?`, [req.params.id]);
+                    return res.json({
+                        error: "No encontrado"
+                    });
+                }
 
-                res.json({ mensaje: "Eliminado" });
-            });
-        }
-    );
-});
+                fs.unlink(row.ruta, () => {
+
+                    db.run(
+                        `DELETE FROM archivos
+                         WHERE id = ?`,
+                        [req.params.id]
+                    );
+
+                    res.json({
+                        mensaje: "Eliminado"
+                    });
+                });
+            }
+        );
+    }
+);
 
 module.exports = router;

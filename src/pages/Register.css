@@ -18,3 +18,35 @@
     color:#2563eb;
     cursor:pointer;
 }
+
+.success-msg{
+
+    background:#d4edda;
+    color:#155724;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    margin-bottom:10px;
+
+    text-align:center;
+
+    font-weight:bold;
+}
+
+.error-msg{
+
+    background:#f8d7da;
+    color:#721c24;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    margin-bottom:10px;
+
+    text-align:center;
+
+    font-weight:bold;
+}

@@ -1,74 +1,71 @@
-const keywordExtractor = require("keyword-extractor");
+const { tokenize } = require("./tokenizer");
 
-const sinonimos = {
-    tecnologia: [
-        "inteligencia artificial",
-        "machine learning", "deep learning",
-        "software", "programacion", "redes",
-        "computadora", "backend", "frontend"
-    ],
-    ciencia: [
-        "biologia", "adn", "genetica",
-        "celula", "quimica", "fisica"
-    ],
-    matematicas: [
-        "algebra", "calculo", "ecuacion",
-        "derivada", "integral", "estadistica"
-    ],
-    medicina: [
-        "hospital", "paciente", "medico",
-        "salud", "diagnostico", "enfermedad"
-    ],
-    historia: [
-        "guerra", "revolucion", "imperio",
-        "civilizacion", "historia"
-    ]
-};
-
-function normalizeText(text = "") {
+function normalize(text = "") {
     return text
         .toLowerCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, ""); // elimina acentos antes de comparar
+        .replace(/[\u0300-\u036f]/g, "");
 }
 
-function detectCategory(text = "") {
-    const normalized = normalizeText(text);
+// Calcula TF de un solo documento
+function termFrequency(words) {
+    const tf = {};
+    const total = words.length || 1;
+    words.forEach(w => {
+        tf[w] = (tf[w] || 0) + 1;
+    });
+    Object.keys(tf).forEach(w => {
+        tf[w] = tf[w] / total;
+    });
+    return tf;
+}
 
-    let best = "General";
-    let maxScore = 0;
+// IDF interno: penaliza palabras muy frecuentes dentro del mismo texto
+// usando la frecuencia relativa como proxy (cuanto más repetida, menos única)
+function scorePalabras(words) {
+    const tf = termFrequency(words);
 
-    for (const category in sinonimos) {
-        let score = 0;
-
-        sinonimos[category].forEach(word => {
-            // normalizar también las palabras del diccionario
-            if (normalized.includes(normalizeText(word))) {
-                score++;
-            }
-        });
-
-        // desempate: si hay empate, mantiene la categoría previa (más específica)
-        if (score > maxScore) {
-            maxScore = score;
-            best = category;
-        }
-    }
-
-    return { categoria: best, confianza: maxScore };
+    // Ordenar por TF descendente — las más frecuentes y representativas primero
+    return Object.entries(tf)
+        .sort((a, b) => b[1] - a[1])
+        .map(([word]) => word);
 }
 
 function sorter(texto) {
-    const keywords = keywordExtractor.extract(texto, {
-        language: "spanish",
-        remove_digits: true,
-        return_changed_case: true,
-        remove_duplicates: true
-    });
+    if (!texto || !texto.trim()) {
+        return {
+            categoria: "General",
+            keywords: "",
+            descripcion: ""
+        };
+    }
 
-    const { categoria, confianza } = detectCategory(texto);
+    const words = tokenize(normalize(texto));
 
-    // Cortar descripción en límite de palabra, sin romper palabras a la mitad
+    if (words.length === 0) {
+        return {
+            categoria: "General",
+            keywords: "",
+            descripcion: texto.substring(0, 300)
+        };
+    }
+
+    // Palabras ordenadas por relevancia (TF)
+    const ranking = scorePalabras(words);
+
+    // Top 10 keywords más representativas del documento
+    const topKeywords = ranking.slice(0, 10);
+
+    // La categoría es la palabra más frecuente y significativa del texto
+    // (la que mejor lo representa según TF)
+    const categoria = topKeywords[0]
+        ? topKeywords[0].charAt(0).toUpperCase() + topKeywords[0].slice(1)
+        : "General";
+
+    // Keywords como string limpio
+    const keywords = topKeywords.join(", ");
+
+    // Descripción cortada en límite de palabra
     const MAX_DESC = 300;
     let descripcion = texto;
     if (texto.length > MAX_DESC) {
@@ -76,15 +73,9 @@ function sorter(texto) {
         descripcion = texto.substring(0, corte > 0 ? corte : MAX_DESC) + "...";
     }
 
-    const cleanKeywords = keywords
-        .filter(k => k.length > 3)
-        .slice(0, 10)
-        .join(", ");
-
     return {
         categoria,
-        confianza,   // útil para decidir si la categoría es confiable
-        keywords: cleanKeywords,
+        keywords,
         descripcion
     };
 }

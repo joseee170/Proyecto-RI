@@ -9,3 +9,34 @@
 .upload-container h2{
     margin-bottom:20px;
 }
+.success-msg{
+
+    background:#d4edda;
+    color:#155724;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    margin-top:10px;
+
+    text-align:center;
+
+    font-weight:bold;
+}
+
+.error-msg{
+
+    background:#f8d7da;
+    color:#721c24;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    margin-top:10px;
+
+    text-align:center;
+
+    font-weight:bold;
+}

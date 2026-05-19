@@ -10,16 +10,27 @@ import api from "../api/api";
 function UploadForm({ actualizar }) {
 
     const [archivo, setArchivo] = useState(null);
+
     const [keywords, setKeywords] = useState("");
+
     const [loading, setLoading] = useState(false);
+
+    // NUEVOS ESTADOS
+    const [mensaje, setMensaje] = useState("");
+    const [error, setError] = useState("");
 
     const fileInputRef = useRef(null);
 
     const subirArchivo = async () => {
 
+        // LIMPIAR MENSAJES
+        setMensaje("");
+        setError("");
+
         if (!archivo) {
 
-            alert("Selecciona un archivo");
+            setError("Selecciona un archivo");
+
             return;
         }
 
@@ -29,7 +40,10 @@ function UploadForm({ actualizar }) {
 
             const formData = new FormData();
 
-            formData.append("archivo", archivo);
+            formData.append(
+                "archivo",
+                archivo
+            );
 
             formData.append(
                 "keywords",
@@ -47,19 +61,32 @@ function UploadForm({ actualizar }) {
                 }
             );
 
+            // ERROR BACKEND
             if (res.data.error) {
 
-                alert(res.data.error);
+                setError(
+                    res.data.error
+                );
 
             } else {
 
-                alert(res.data.mensaje);
+                setMensaje(
+                    res.data.mensaje
+                );
+
+                // BORRAR MENSAJE AUTOMATICAMENTE
+                setTimeout(() => {
+
+                    setMensaje("");
+
+                }, 1000);
 
                 setArchivo(null);
+
                 setKeywords("");
 
-                
                 if (fileInputRef.current) {
+
                     fileInputRef.current.value = "";
                 }
 
@@ -70,7 +97,9 @@ function UploadForm({ actualizar }) {
 
             console.log(error);
 
-            alert("Error al subir archivo");
+            setError(
+                "Error al subir archivo"
+            );
 
         } finally {
 
@@ -83,18 +112,44 @@ function UploadForm({ actualizar }) {
         <div className="upload-container">
 
             <h2>
+
                 Subir Archivo
+
             </h2>
 
             <input
                 type="file"
                 ref={fileInputRef}
                 onChange={(e) =>
-                    setArchivo(e.target.files[0])
+                    setArchivo(
+                        e.target.files[0]
+                    )
                 }
             />
 
             <br /><br />
+
+            {/* MENSAJE EXITO */}
+            {mensaje && (
+
+                <div className="success-msg">
+
+                    {mensaje}
+
+                </div>
+            )}
+
+            {/* MENSAJE ERROR */}
+            {error && (
+
+                <div className="error-msg">
+
+                    {error}
+
+                </div>
+            )}
+
+            <br />
 
             <button
                 onClick={subirArchivo}

@@ -1,30 +1,17 @@
 const Tesseract = require("tesseract.js");
+const path = require("path");
 
-/**
- * Extrae texto de una imagen usando OCR.
- * @param {string} ruta - Ruta del archivo de imagen
- * @param {number} umbralConfianza - Confianza mínima (0-100) para incluir una palabra
- * @returns {Promise<string>} Texto extraído con palabras de alta confianza
- */
-async function extraerTextoImagen(ruta, umbralConfianza = 60) {
+const CACHE_PATH = path.join(__dirname, "../tessdata");
+
+async function extraerTextoImagen(ruta) {
     try {
         const resultado = await Tesseract.recognize(ruta, "spa", {
-            logger: () => {} // silenciar logs en producción
+            logger: () => {},
+            cachePath: CACHE_PATH
         });
-
-        // Filtrar palabras por nivel de confianza para evitar
-        // que texto borroso o mal reconocido contamine el índice
-        const textofiltrado = resultado.data.words
-            .filter(w => w.confidence >= umbralConfianza)
-            .map(w => w.text)
-            .join(" ")
-            .trim();
-
-        // Si no hay suficiente texto confiable, devolver cadena vacía
-        return textofiltrado;
-
+        return resultado.data.text;
     } catch (error) {
-        console.error("[OCR] Error al procesar imagen:", ruta, error.message);
+        console.log(error);
         return "";
     }
 }
