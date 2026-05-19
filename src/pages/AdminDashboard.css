@@ -1,18 +1,22 @@
+/* CONTENEDOR PRINCIPAL DEL DASHBOARD */
 .dashboard-container{
     padding:20px;
 }
 
+/* TITULO DEL DASHBOARD */
 .dashboard-title{
     margin-bottom:20px;
 }
 
+/* GRID DONDE SE MUESTRAN LOS ARCHIVOS */
 .files-grid{
     display:grid;
     grid-template-columns:
         repeat(auto-fill,minmax(350px,1fr));
     gap:20px;
 }
-/* ── Filtros ── */
+
+/* CONTENEDOR DE BOTONES DE FILTRO */
 .filters-container {
     display: flex;
     gap: 10px;
@@ -20,6 +24,7 @@
     flex-wrap: wrap;
 }
 
+/* BOTON DE FILTRO NORMAL */
 .filter-btn {
     padding: 8px 16px;
     border-radius: 10px;
@@ -31,11 +36,13 @@
     transition: background 0.2s, transform 0.15s;
 }
 
+/* EFECTO AL PASAR EL MOUSE */
 .filter-btn:hover {
     background: #f3f4f6;
     transform: translateY(-1px);
 }
 
+/* BOTON ACTIVO SELECCIONADO */
 .filter-btn.active {
     background: #2563eb;
     color: white;

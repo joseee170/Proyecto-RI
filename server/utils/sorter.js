@@ -1,38 +1,58 @@
+//SE IMPORTA EL TOKENIZADOR
 const { tokenize } = require("./tokenizer");
 
+//FUNCION PARA NORMALIZAR TEXTO
 function normalize(text = "") {
+
     return text
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
 }
 
-// Calcula TF de un solo documento
+//FUNCION PARA CALCULAR TF
 function termFrequency(words) {
+
     const tf = {};
+
+    //TOTAL DE PALABRAS
     const total = words.length || 1;
+
+    //SE CUENTAN LAS REPETICIONES
     words.forEach(w => {
+
         tf[w] = (tf[w] || 0) + 1;
     });
+
+    //SE NORMALIZA EL VALOR TF
     Object.keys(tf).forEach(w => {
+
         tf[w] = tf[w] / total;
     });
+
     return tf;
 }
 
-// IDF interno: penaliza palabras muy frecuentes dentro del mismo texto
-// usando la frecuencia relativa como proxy (cuanto más repetida, menos única)
+//FUNCION PARA ORDENAR PALABRAS POR RELEVANCIA
 function scorePalabras(words) {
+
+    //SE CALCULA TF
     const tf = termFrequency(words);
 
-    // Ordenar por TF descendente — las más frecuentes y representativas primero
+    //SE ORDENAN LAS PALABRAS
     return Object.entries(tf)
+
         .sort((a, b) => b[1] - a[1])
+
         .map(([word]) => word);
 }
 
+//FUNCION PRINCIPAL PARA CLASIFICAR TEXTO
 function sorter(texto) {
+
+    //SI EL TEXTO ESTA VACIO
     if (!texto || !texto.trim()) {
+
         return {
             categoria: "General",
             keywords: "",
@@ -40,9 +60,13 @@ function sorter(texto) {
         };
     }
 
-    const words = tokenize(normalize(texto));
+    //SE TOKENIZA EL TEXTO
+    const words =
+        tokenize(normalize(texto));
 
+    //SI NO HAY PALABRAS
     if (words.length === 0) {
+
         return {
             categoria: "General",
             keywords: "",
@@ -50,29 +74,55 @@ function sorter(texto) {
         };
     }
 
-    // Palabras ordenadas por relevancia (TF)
-    const ranking = scorePalabras(words);
+    //SE OBTIENEN LAS PALABRAS MAS IMPORTANTES
+    const ranking =
+        scorePalabras(words);
 
-    // Top 10 keywords más representativas del documento
-    const topKeywords = ranking.slice(0, 10);
+    //TOP 10 KEYWORDS
+    const topKeywords =
+        ranking.slice(0, 10);
 
-    // La categoría es la palabra más frecuente y significativa del texto
-    // (la que mejor lo representa según TF)
-    const categoria = topKeywords[0]
-        ? topKeywords[0].charAt(0).toUpperCase() + topKeywords[0].slice(1)
+    //SE DEFINE LA CATEGORIA
+    const categoria =
+        topKeywords[0]
+
+        ? topKeywords[0]
+            .charAt(0)
+            .toUpperCase() +
+
+          topKeywords[0]
+            .slice(1)
+
         : "General";
 
-    // Keywords como string limpio
-    const keywords = topKeywords.join(", ");
+    //SE UNEN LAS KEYWORDS
+    const keywords =
+        topKeywords.join(", ");
 
-    // Descripción cortada en límite de palabra
+    //LIMITE DE DESCRIPCION
     const MAX_DESC = 300;
+
     let descripcion = texto;
+
+    //SE RECORTA LA DESCRIPCION
     if (texto.length > MAX_DESC) {
-        const corte = texto.lastIndexOf(" ", MAX_DESC);
-        descripcion = texto.substring(0, corte > 0 ? corte : MAX_DESC) + "...";
+
+        const corte =
+            texto.lastIndexOf(
+                " ",
+                MAX_DESC
+            );
+
+        descripcion =
+            texto.substring(
+                0,
+                corte > 0
+                    ? corte
+                    : MAX_DESC
+            ) + "...";
     }
 
+    //SE DEVUELVEN LOS DATOS
     return {
         categoria,
         keywords,
@@ -80,4 +130,5 @@ function sorter(texto) {
     };
 }
 
+//SE EXPORTA LA FUNCION
 module.exports = sorter;

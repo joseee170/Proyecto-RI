@@ -1,31 +1,36 @@
-body{
-    margin:0;
+/* ESTILOS GLOBALES DEL DOCUMENTO */
+body {
+    margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    background:#f4f4f4;
+    background: #f4f4f4;
 }
 
-button{
-    background:#2563eb;
-    color:white;
-    border:none;
-    padding:10px 15px;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:16px;
+/* ESTILO GLOBAL PARA BOTONES */
+button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
 }
 
-button:hover{
-    background:#1d4ed8;
+/* EFECTO HOVER PARA BOTONES */
+button:hover {
+    background: #1d4ed8;
 }
 
-input{
-    padding:10px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    width:300px;
-    font-size:16px;
+/* ESTILO GLOBAL PARA INPUTS */
+input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 300px;
+    font-size: 16px;
 }
 
-h1,h2,h3{
-    color:#222;
+/* ESTILO GLOBAL PARA TÍTULOS */
+h1, h2, h3 {
+    color: #222;
 }

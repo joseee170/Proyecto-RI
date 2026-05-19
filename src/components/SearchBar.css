@@ -1,10 +1,10 @@
-/* ── Wrapper posiciona el dropdown ── */
+/* WRAPPER SEARCH */
 .search-wrapper {
     position: relative;
     margin-bottom: 20px;
 }
 
-/* ── Fila input + botón ── */
+/* INPUT + BOTON */
 .search-container {
     display: flex;
     gap: 10px;
@@ -25,7 +25,7 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-/* ── Dropdown de sugerencias ── */
+/* DROPDOWN SUGERENCIAS */
 .sugerencias-lista {
     position: absolute;
     top: calc(100% + 4px);
@@ -44,10 +44,10 @@
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-4px); }
-    to   { opacity: 1; transform: translateY(0); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Cada fila ── */
+/* ITEM SUGERENCIA */
 .sugerencia-item {
     display: flex;
     align-items: center;
@@ -64,22 +64,16 @@
     background: #f3f4f6;
 }
 
-/* ── Icono lupa ── */
-.sugerencia-icono {
-    font-size: 13px;
-    opacity: 0.45;
-    flex-shrink: 0;
-}
-
-/* ── Texto coincidente en negrita ── */
-.sugerencia-item strong {
-    font-weight: 700;
-    color: #2563eb;
-}
-
+/* ICONO */
 .sugerencia-icono {
     width: 16px;
     height: 16px;
     opacity: 0.45;
     flex-shrink: 0;
+}
+
+/* TEXTO DESTACADO */
+.sugerencia-item strong {
+    font-weight: 700;
+    color: #2563eb;
 }

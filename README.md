@@ -1,10 +1,10 @@
-# 📁 Sistema de Recuperación de Información Multimedia
+# Sistema de Recuperación de Información Multimedia
 
 Aplicación web fullstack para subir, clasificar automáticamente y buscar archivos multimedia mediante TF-IDF y similitud coseno.
 
 ---
 
-## 🗂 Estructura del proyecto
+## Estructura del proyecto
 
 ```
 proyecto/
@@ -23,14 +23,14 @@ proyecto/
 
 ---
 
-## ⚙️ Requisitos previos
+## Requisitos previos
 
 - [Node.js](https://nodejs.org/) v18
 - npm v9 o superior
 
 ---
 
-## 🚀 Instalación y ejecución
+## Instalación y ejecución
 
 ### 1. Clonar o descomprimir el proyecto
 
@@ -84,7 +84,7 @@ npm start
 
 ---
 
-## 📦 Dependencias Frontend
+## Dependencias Frontend
 
 | Librería | Versión | Uso |
 |---|---|---|
@@ -101,7 +101,7 @@ npm start
 
 ---
 
-## 📦 Dependencias Backend
+## Dependencias Backend
 
 ### Servidor y autenticación
 
@@ -153,7 +153,7 @@ npm start
 
 ---
 
-## 🔑 Variables de entorno
+## Variables de entorno
 
 Crea un archivo `.env` dentro de `server/` con el siguiente contenido:
 
@@ -164,7 +164,7 @@ PORT=3001
 
 ---
 
-## 📂 Formatos de archivo soportados
+## Formatos de archivo soportados
 
 | Tipo | Extensiones |
 |---|---|
@@ -177,7 +177,7 @@ PORT=3001
 
 ---
 
-## 👤 Roles de usuario
+## Roles de usuario
 
 | Rol | Subir | Eliminar | Buscar | Descargar |
 |---|---|---|---|---|
@@ -186,7 +186,7 @@ PORT=3001
 
 ---
 
-## 🧠 Modelo de recuperación
+## Modelo de recuperación
 
 El sistema usa **TF-IDF + Similitud Coseno** para clasificar y buscar documentos:
 
@@ -197,7 +197,7 @@ El sistema usa **TF-IDF + Similitud Coseno** para clasificar y buscar documentos
 
 ---
 
-## 📝 Notas
+## Notas
 
 - `keyword-extractor` está instalado pero no se usa activamente; la extracción de keywords se realiza con TF-IDF propio.
 - `@xenova/transformers` está instalado para uso futuro con embeddings semánticos.

@@ -1,3 +1,4 @@
+/* IMPORTACION DE ESTILOS DEL REGISTRO */
 import "./Register.css";
 
 import { useState } from "react";
@@ -7,9 +8,11 @@ import api from "../api/api";
 
 function Register() {
 
+    /* CAMPOS DEL FORMULARIO */
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    /* MENSAJES DE ESTADO */
     const [mensaje, setMensaje] = useState("");
     const [error, setError] = useState("");
 
@@ -19,7 +22,7 @@ function Register() {
 
         try {
 
-            // LIMPIAR MENSAJES
+            // LIMPIAR MENSAJES ANTES DE REGISTRAR
             setMensaje("");
             setError("");
 
@@ -31,18 +34,16 @@ function Register() {
                 }
             );
 
-            // REGISTRO EXITOSO
+            // SI EL BACKEND RESPONDE CON MENSAJE ES EXITOSO
             if (res.data.mensaje) {
 
                 setMensaje(
                     "Usuario registrado correctamente"
                 );
 
-                // REDIRECCIONAR
+                // REDIRECCION AL LOGIN DESPUES DE UN TIEMPO
                 setTimeout(() => {
-
                     navigate("/");
-
                 }, 1500);
 
             } else {
@@ -58,7 +59,7 @@ function Register() {
             console.log(error);
 
             setError(
-                "Error de conexión con el servidor"
+                "Error de conexion con el servidor"
             );
         }
     };
@@ -90,39 +91,30 @@ function Register() {
                         setPassword(e.target.value)
                     }
                     onKeyDown={(e) =>
-                        e.key === "Enter" &&
-                        register()
+                        e.key === "Enter" && register()
                     }
                 />
 
                 <br /><br />
 
-                {/* MENSAJE EXITO */}
+                {/* MENSAJE DE EXITO */}
                 {mensaje && (
-
                     <div className="success-msg">
-
                         {mensaje}
-
                     </div>
                 )}
 
-                {/* MENSAJE ERROR */}
+                {/* MENSAJE DE ERROR */}
                 {error && (
-
                     <div className="error-msg">
-
                         {error}
-
                     </div>
                 )}
 
                 <br />
 
                 <button onClick={register}>
-
                     Registrarse
-
                 </button>
 
                 <br /><br />

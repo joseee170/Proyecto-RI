@@ -1,4 +1,4 @@
-/* ── Tarjeta ── */
+/* TARJETA */
 .file-card {
     position: relative;
     background: white;
@@ -10,7 +10,7 @@
     height: 300px;
 }
 
-/* ── Categoría (esquina superior derecha) ── */
+/* CATEGORIA */
 .file-keywords {
     position: absolute;
     top: 15px;
@@ -23,7 +23,7 @@
     font-size: 12px;
 }
 
-/* ── Título ── */
+/* TITULO */
 .file-title {
     font-size: 20px;
     font-weight: bold;
@@ -37,9 +37,9 @@
     overflow: hidden;
 }
 
-/* ── Multimedia inline ── */
+/* MULTIMEDIA INLINE */
 .file-card > img,
-.file-card >video,
+.file-card > video,
 .file-card > iframe {
     width: 100%;
     height: 150px;
@@ -53,7 +53,7 @@
     margin-top: 10px;
 }
 
-/* ── Icono de documento ── */
+/* ICONO DOCUMENTO */
 .doc-icono-wrap {
     flex: 1;
     display: flex;
@@ -65,11 +65,10 @@
     width: 90px !important;
     height: 90px !important;
     object-fit: contain !important;
-    border-radius: 0 !important;
     margin: 0 !important;
 }
 
-/* ── Botones (fijos abajo) ── */
+/* BOTONES */
 .buttons-container {
     margin-top: auto;
     display: flex;
@@ -90,16 +89,16 @@
     flex: 1;
 }
 
-.download-button   { background: #16a34a; }
+.download-button { background: #16a34a; }
 .download-button:hover { background: #15803d; }
 
 .visualizar-button { background: #2563eb; }
 .visualizar-button:hover { background: #1d4ed8; }
 
-.delete-button     { background: #ef4444; }
+.delete-button { background: #ef4444; }
 .delete-button:hover { background: #dc2626; }
 
-/* ── Modal overlay ── */
+/* MODAL OVERLAY */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -113,10 +112,10 @@
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Caja del modal ── */
+/* MODAL CONTENIDO */
 .modal-content {
     background: white;
     border-radius: 14px;
@@ -129,7 +128,7 @@
     overflow: hidden;
 }
 
-/* ── Header del modal ── */
+/* MODAL HEADER */
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -137,7 +136,6 @@
     padding: 14px 20px;
     border-bottom: 1px solid #e5e7eb;
     background: #f9fafb;
-    flex-shrink: 0;
 }
 
 .modal-titulo {
@@ -157,8 +155,6 @@
     color: #6b7280;
     padding: 2px 8px;
     border-radius: 6px;
-    transition: background 0.15s;
-    flex-shrink: 0;
 }
 
 .modal-cerrar:hover {
@@ -166,14 +162,14 @@
     color: #111;
 }
 
-/* ── Cuerpo del modal ── */
+/* MODAL BODY */
 .modal-body {
     overflow-y: auto;
     padding: 24px;
     flex: 1;
 }
 
-/* ── PDF en modal (iframe grande) ── */
+/* PDF */
 .modal-iframe {
     width: 100%;
     height: 65vh;
@@ -181,7 +177,7 @@
     border-radius: 6px;
 }
 
-/* ── Word / Excel convertido a HTML ── */
+/* WORD EXCEL */
 .modal-html {
     font-size: 14px;
     line-height: 1.7;
@@ -213,7 +209,7 @@
     margin-bottom: 10px;
 }
 
-/* ── Estados del modal ── */
+/* ESTADOS */
 .modal-cargando {
     text-align: center;
     color: #6b7280;
@@ -233,6 +229,7 @@
     color: #2563eb;
 }
 
+/* IMAGEN MODAL */
 .img-modal-wrap {
     position: relative;
     display: flex;
@@ -241,14 +238,9 @@
 }
 
 .img-fullscreen {
-
     max-width: 90vw;
     max-height: 90vh;
     object-fit: contain;
     border-radius: 10px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-}
-
-.img-cerrar:hover {
-    background: #606164;
 }

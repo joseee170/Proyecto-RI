@@ -1,7 +1,9 @@
+/* CONTENEDOR PRINCIPAL DEL VISUALIZADOR */
 .viewer-container{
     padding:30px;
 }
 
+/* ENCABEZADO DEL VISUALIZADOR */
 .viewer-header{
     display:flex;
     justify-content:space-between;
@@ -9,6 +11,7 @@
     margin-bottom:20px;
 }
 
+/* CONTENEDOR DE FILTROS */
 .filters-container {
     display: flex;
     gap: 10px;
@@ -16,7 +19,7 @@
     flex-wrap: wrap;
 }
 
-/* BOTONES */
+/* BOTONES DE FILTRO */
 .filter-btn {
     padding: 8px 14px;
     border-radius: 10px;
@@ -27,21 +30,21 @@
     font-size: 14px;
 }
 
-/* HOVER SUAVE */
+/* EFECTO AL PASAR EL MOUSE */
 .filter-btn:hover {
     background: #ffffff;
     transform: translateY(-1px);
     color: #000000;
 }
 
-/* ACTIVO */
+/* BOTON ACTIVO SELECCIONADO */
 .filter-btn.active {
     background: #2563eb;
     color: white;
     border-color: #2563eb;
 }
 
-/* GRID */
+/* GRID DE ARCHIVOS */
 .viewer-grid{
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -49,7 +52,7 @@
     margin-top:20px;
 }
 
-/* BOTÓN BACK */
+/* BOTON DE REGRESO */
 .back-button{
     background:none;
     border:none;
@@ -58,12 +61,14 @@
     transition:0.2s;
 }
 
+/* EFECTO AL PASAR EL MOUSE EN BOTON BACK */
 .back-button:hover{
     background: #ffffff;
     transform: translateY(-1px);
     color: #000000;
 }
 
+/* ICONO DEL BOTON BACK */
 .back-icon{
     width:50px;
     height:50px;

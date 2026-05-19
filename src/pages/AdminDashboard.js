@@ -1,3 +1,4 @@
+/* IMPORTACION DE ESTILOS DEL DASHBOARD */
 import "./AdminDashboard.css";
 
 import { useEffect, useState, useMemo } from "react";
@@ -8,6 +9,7 @@ import UploadForm from "../components/UploadForm";
 import SearchBar from "../components/SearchBar";
 import FileCard from "../components/FileCard";
 
+/* LISTA DE FILTROS DISPONIBLES EN LA INTERFAZ */
 const FILTROS = [
     { label: "Todo",      tipo: "todo" },
     { label: "Imágenes",  tipo: "imagen" },
@@ -16,6 +18,7 @@ const FILTROS = [
     { label: "Docs",      tipo: "doc" },
 ];
 
+/* EXTENSIONES AGRUPADAS POR TIPO DE ARCHIVO */
 const EXTENSIONES = {
     imagen: ["jpg","jpeg","png","gif","webp","bmp","svg","tiff","ico","avif","heic"],
     video:  ["mp4","mkv","avi","mov","wmv","flv","webm","m4v","3gp","mpeg","mpg"],
@@ -23,10 +26,12 @@ const EXTENSIONES = {
     doc:    ["pdf","doc","docx","xls","xlsx","ppt","pptx","txt","csv","odt","ods","odp","rtf"],
 };
 
+/* OBTIENE LA EXTENSION DEL ARCHIVO */
 function getExt(nombre = "") {
     return nombre.split(".").pop().toLowerCase();
 }
 
+/* VERIFICA SI EL ARCHIVO COINCIDE CON EL FILTRO SELECCIONADO */
 function matchFiltro(archivo, filtro) {
     if (filtro === "todo") return true;
     const ext = getExt(archivo.nombre || archivo.ruta || "");
@@ -35,26 +40,36 @@ function matchFiltro(archivo, filtro) {
 
 function AdminDashboard() {
 
+    /* TEXTO DE BUSQUEDA */
     const [busqueda, setBusqueda] = useState("");
+
+    /* RESULTADOS OBTENIDOS DEL BACKEND */
     const [resultados, setResultados] = useState([]);
+
+    /* FILTRO ACTIVO (TIPO DE ARCHIVO) */
     const [filtroActivo, setFiltroActivo] = useState("todo");
 
+    /* CONSULTA AL BACKEND PARA BUSCAR ARCHIVOS */
     const buscar = async () => {
         try {
             const res = await api.get("/files/buscar", {
                 params: { q: busqueda },
                 headers: { Authorization: localStorage.getItem("token") }
             });
+
             setResultados(Array.isArray(res.data) ? res.data : []);
+
         } catch (error) {
             console.log(error);
         }
     };
 
+    /* CARGA INICIAL DE ARCHIVOS */
     useEffect(() => {
         buscar();
     }, []);
 
+    /* RESULTADOS FILTRADOS SEGUN EL TIPO DE ARCHIVO */
     const resultadosFiltrados = useMemo(
         () => resultados.filter(a => matchFiltro(a, filtroActivo)),
         [resultados, filtroActivo]
@@ -63,9 +78,12 @@ function AdminDashboard() {
     return (
         <div>
             <Navbar />
+
             <div className="dashboard-container">
 
-                <h1 className="dashboard-title">Panel Administrador</h1>
+                <h1 className="dashboard-title">
+                    Panel Administrador
+                </h1>
 
                 <UploadForm actualizar={buscar} />
 
@@ -77,6 +95,7 @@ function AdminDashboard() {
                     buscar={buscar}
                 />
 
+                {/* BOTONES DE FILTRO */}
                 <div className="filters-container">
                     {FILTROS.map(({ label, tipo }) => (
                         <button
@@ -89,6 +108,7 @@ function AdminDashboard() {
                     ))}
                 </div>
 
+                {/* LISTA DE ARCHIVOS */}
                 <div className="files-grid">
                     {resultadosFiltrados.map((archivo) => (
                         <FileCard

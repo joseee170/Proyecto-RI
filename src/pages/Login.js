@@ -1,3 +1,4 @@
+/* IMPORTACION DE HOOKS DE REACT PARA ESTADOS Y NAVEGACION */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -6,9 +7,11 @@ import api from "../api/api";
 
 function Login() {
 
+    /* CAMPOS DEL FORMULARIO */
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    /* MENSAJES DE RESPUESTA */
     const [mensaje, setMensaje] = useState("");
     const [error, setError] = useState("");
 
@@ -18,7 +21,7 @@ function Login() {
 
         try {
 
-            // LIMPIAR MENSAJES
+            // LIMPIAR MENSAJES ANTES DE INTENTAR LOGIN
             setMensaje("");
             setError("");
 
@@ -27,7 +30,7 @@ function Login() {
                 password
             });
 
-            // LOGIN EXITOSO
+            // SI EL BACKEND DEVUELVE TOKEN ES LOGIN EXITOSO
             if (res.data.token) {
 
                 localStorage.setItem(
@@ -37,10 +40,9 @@ function Login() {
 
                 setMensaje("Inicio de sesión correcto");
 
+                // REDIRECCION A PANEL ADMIN DESPUES DE 1 SEGUNDO
                 setTimeout(() => {
-
                     navigate("/admin");
-
                 }, 1000);
 
             } else {
@@ -92,32 +94,24 @@ function Login() {
 
                 <br /><br />
 
-                {/* MENSAJE EXITO */}
+                {/* MENSAJE DE EXITO */}
                 {mensaje && (
-
                     <div className="success-msg">
-
                         {mensaje}
-
                     </div>
                 )}
 
-                {/* MENSAJE ERROR */}
+                {/* MENSAJE DE ERROR */}
                 {error && (
-
                     <div className="error-msg">
-
                         {error}
-
                     </div>
                 )}
 
                 <br />
 
                 <button onClick={login}>
-
                     Ingresar
-
                 </button>
 
                 <p

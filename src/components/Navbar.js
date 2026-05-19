@@ -1,3 +1,4 @@
+/* NAVBAR COMPONENTE */
 import "./Navbar.css";
 
 import {
@@ -11,17 +12,21 @@ import api from "../api/api";
 
 function Navbar() {
 
+    //NAVEGACION ENTRE PAGINAS
     const navigate = useNavigate();
 
+    //USERNAME DEL USUARIO
     const [username, setUsername] =
         useState("");
 
+    //SE EJECUTA AL CARGAR EL COMPONENTE
     useEffect(() => {
 
         obtenerUsuario();
 
     }, []);
 
+    //OBTENER USUARIO LOGEADO
     const obtenerUsuario = async () => {
 
         try {
@@ -45,9 +50,7 @@ function Navbar() {
 
             if (res.data.username) {
 
-                setUsername(
-                    res.data.username
-                );
+                setUsername(res.data.username);
             }
 
         } catch (error) {
@@ -56,6 +59,7 @@ function Navbar() {
         }
     };
 
+    //CERRAR SESION
     const logout = () => {
 
         localStorage.removeItem("token");

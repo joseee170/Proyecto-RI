@@ -1,148 +1,291 @@
+//SE IMPORTAN LOS ESTILOS
 import "./FileCard.css";
+
+//SE IMPORTAN LOS HOOKS
 import { useState, useRef } from "react";
+
+//SE IMPORTA LA API
 import api from "../api/api";
 
-// Extensiones que tienen botón Visualizar
+//FUNCION PARA SABER SI ES DOCUMENTO
 function esDocumento(nombre = "") {
+
     const n = nombre.toLowerCase();
+
     return (
+
         n.endsWith(".pdf")  ||
-        n.endsWith(".doc")  || n.endsWith(".docx") ||
-        n.endsWith(".xls")  || n.endsWith(".xlsx") ||
-        n.endsWith(".ppt")  || n.endsWith(".pptx")
+
+        n.endsWith(".doc")  ||
+        n.endsWith(".docx") ||
+
+        n.endsWith(".xls")  ||
+        n.endsWith(".xlsx") ||
+
+        n.endsWith(".ppt")  ||
+        n.endsWith(".pptx")
     );
 }
 
+//FUNCION PARA OBTENER EL ICONO
 function obtenerIcono(nombre = "") {
+
     const n = nombre.toLowerCase();
-    if (n.endsWith(".pdf"))                       return "/icons/pdf.png";
-    if (n.endsWith(".doc")  || n.endsWith(".docx")) return "/icons/doc.png";
-    if (n.endsWith(".xls")  || n.endsWith(".xlsx")) return "/icons/xls.png";
-    if (n.endsWith(".ppt")  || n.endsWith(".pptx")) return "/icons/ppt.png";
+
+    if (n.endsWith(".pdf"))
+        return "/icons/pdf.png";
+
+    if (
+        n.endsWith(".doc") ||
+        n.endsWith(".docx")
+    )
+        return "/icons/doc.png";
+
+    if (
+        n.endsWith(".xls") ||
+        n.endsWith(".xlsx")
+    )
+        return "/icons/xls.png";
+
+    if (
+        n.endsWith(".ppt") ||
+        n.endsWith(".pptx")
+    )
+        return "/icons/ppt.png";
+
     return "/icons/file.png";
 }
 
-function FileCard({ archivo, actualizar, admin = false }) {
+//COMPONENTE PRINCIPAL
+function FileCard({
+    archivo,
+    actualizar,
+    admin = false
+}) {
 
-    const [modalAbierto, setModalAbierto] = useState(false);
-    const [preview, setPreview]           = useState(null);
-    const [cargando, setCargando]         = useState(false);
-    const docRef = useRef(null);
-    const [imgExpandida, setImgExpandida] = useState(false);
+    //ESTADOS DEL COMPONENTE
+    const [modalAbierto, setModalAbierto] =
+        useState(false);
 
-    const fileUrl = `http://localhost:3001/${archivo.ruta}`;
+    const [preview, setPreview] =
+        useState(null);
 
-    // ── Acciones ──────────────────────────────────────
+    const [cargando, setCargando] =
+        useState(false);
+
+    const docRef =
+        useRef(null);
+
+    const [imgExpandida, setImgExpandida] =
+        useState(false);
+
+    //URL DEL ARCHIVO
+    const fileUrl =
+        `http://localhost:3001/${archivo.ruta}`;
+
+    //FUNCION PARA DESCARGAR
     const descargar = () =>
-        window.open(`http://localhost:3001/files/download/${archivo.id}`, "_blank");
 
+        window.open(
+            `http://localhost:3001/files/download/${archivo.id}`,
+            "_blank"
+        );
+
+    //FUNCION PARA ELIMINAR
     const eliminar = async () => {
-        if (!window.confirm("¿Eliminar archivo?")) return;
+
+        //CONFIRMACION
+        if (!window.confirm("¿Eliminar archivo?"))
+            return;
+
         try {
-            await api.delete(`/files/eliminar/${archivo.id}`, {
-                headers: { Authorization: localStorage.getItem("token") }
-            });
+
+            //PETICION DELETE
+            await api.delete(
+                `/files/eliminar/${archivo.id}`,
+                {
+                    headers: {
+                        Authorization:
+                            localStorage.getItem("token")
+                    }
+                }
+            );
+
+            //ACTUALIZAR LISTA
             actualizar();
+
         } catch (e) {
+
             console.log(e);
         }
     };
 
+    //FUNCION PARA VISUALIZAR
     const visualizar = async () => {
+
         setModalAbierto(true);
+
         setCargando(true);
+
         setPreview(null);
+
         try {
-            const res = await api.get(`/files/preview/${archivo.id}`);
+
+            //PETICION PARA PREVISUALIZAR
+            const res =
+                await api.get(
+                    `/files/preview/${archivo.id}`
+                );
+
             setPreview(res.data);
+
         } catch {
-            setPreview({ error: "No se pudo cargar la previsualización." });
+
+            setPreview({
+                error:
+                    "No se pudo cargar la previsualización."
+            });
         }
+
         setCargando(false);
     };
 
+    //FUNCION PARA CERRAR MODAL
     const cerrarModal = () => {
+
         setModalAbierto(false);
+
         setPreview(null);
     };
 
-    // ── Render ────────────────────────────────────────
+    //RENDER DEL COMPONENTE
     return (
         <>
             <div className="file-card">
 
-                {/* Categoría */}
-                <div className="file-keywords">{archivo.categoria}</div>
+                {/*CATEGORIA*/}
+                <div className="file-keywords">
+                    {archivo.categoria}
+                </div>
 
-                {/* Título */}
-                <div className="file-title">{archivo.nombre}</div>
+                {/*NOMBRE*/}
+                <div className="file-title">
+                    {archivo.nombre}
+                </div>
 
-                {/* ── Previsualización inline ── */}
+                {/*PREVISUALIZACION DE IMAGEN*/}
                 {archivo.tipo.includes("image") && (
                     <>
                         <img
                             src={fileUrl}
                             alt={archivo.nombre}
-                            onClick={() => setImgExpandida(true)}
-                            style={{ cursor: "pointer" }}
+
+                            //ABRIR IMAGEN
+                            onClick={() =>
+                                setImgExpandida(true)
+                            }
+
+                            style={{
+                                cursor: "pointer"
+                            }}
                         />
 
+                        {/*MODAL DE IMAGEN*/}
                         {imgExpandida && (
+
                             <div
                                 className="modal-overlay"
-                                onClick={() => setImgExpandida(false)}
+
+                                onClick={() =>
+                                    setImgExpandida(false)
+                                }
                             >
-                                <div className="img-modal-wrap" onClick={(e) => e.stopPropagation()}>
+
+                                <div
+                                    className="img-modal-wrap"
+
+                                    onClick={(e) =>
+                                        e.stopPropagation()
+                                    }
+                                >
+
                                     <img
                                         src={fileUrl}
                                         alt={archivo.nombre}
                                         className="img-fullscreen"
                                     />
+
                                 </div>
                             </div>
                         )}
                     </>
                 )}
 
+                {/*PREVISUALIZACION DE VIDEO*/}
                 {archivo.tipo.includes("video") && (
+
                     <video controls>
                         <source src={fileUrl} />
                     </video>
                 )}
 
+                {/*PREVISUALIZACION DE AUDIO*/}
                 {archivo.tipo.includes("audio") && (
+
                     <audio controls>
                         <source src={fileUrl} />
                     </audio>
                 )}
 
-                {/* Documentos: solo icono, sin iframe inline */}
+                {/*ICONO PARA DOCUMENTOS*/}
                 {esDocumento(archivo.nombre) && (
+
                     <div className="doc-icono-wrap">
+
                         <img
-                            src={obtenerIcono(archivo.nombre)}
+                            src={
+                                obtenerIcono(
+                                    archivo.nombre
+                                )
+                            }
+
                             alt="icono"
+
                             className="doc-icono"
                         />
+
                     </div>
                 )}
 
-                {/* ── Botones ── */}
+                {/*BOTONES*/}
                 <div className="buttons-container">
 
-                    <button className="download-button" onClick={descargar}>
+                    {/*BOTON DESCARGAR*/}
+                    <button
+                        className="download-button"
+                        onClick={descargar}
+                    >
                         Descargar
                     </button>
 
-                    {/* Botón Visualizar — solo para documentos */}
+                    {/*BOTON VISUALIZAR*/}
                     {esDocumento(archivo.nombre) && (
-                        <button className="visualizar-button" onClick={visualizar}>
+
+                        <button
+                            className="visualizar-button"
+                            onClick={visualizar}
+                        >
                             Visualizar
                         </button>
                     )}
 
+                    {/*BOTON ELIMINAR*/}
                     {admin && (
-                        <button className="delete-button" onClick={eliminar}>
+
+                        <button
+                            className="delete-button"
+                            onClick={eliminar}
+                        >
                             Eliminar
                         </button>
                     )}
@@ -150,28 +293,65 @@ function FileCard({ archivo, actualizar, admin = false }) {
                 </div>
             </div>
 
-            {/* ── Modal ── */}
+            {/*MODAL*/}
             {modalAbierto && (
-                <div className="modal-overlay" onClick={cerrarModal}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
 
+                <div
+                    className="modal-overlay"
+                    onClick={cerrarModal}
+                >
+
+                    <div
+                        className="modal-content"
+
+                        onClick={(e) =>
+                            e.stopPropagation()
+                        }
+                    >
+
+                        {/*ENCABEZADO*/}
                         <div className="modal-header">
-                            <span className="modal-titulo">{archivo.nombre}</span>
-                            <button className="modal-cerrar" onClick={cerrarModal}>✕</button>
+
+                            <span className="modal-titulo">
+                                {archivo.nombre}
+                            </span>
+
+                            <button
+                                className="modal-cerrar"
+                                onClick={cerrarModal}
+                            >
+                                ✕
+                            </button>
+
                         </div>
 
+                        {/*CUERPO*/}
                         <div className="modal-body">
 
+                            {/*CARGANDO*/}
                             {cargando && (
-                                <div className="modal-cargando">Cargando previsualización...</div>
+
+                                <div className="modal-cargando">
+
+                                    Cargando previsualización...
+
+                                </div>
                             )}
 
+                            {/*ERROR*/}
                             {!cargando && preview?.error && (
-                                <div className="modal-error">{preview.error}</div>
+
+                                <div className="modal-error">
+
+                                    {preview.error}
+
+                                </div>
                             )}
 
-                            {/* PDF dentro del modal */}
-                            {!cargando && preview?.tipo === "pdf" && (
+                            {/*PDF*/}
+                            {!cargando &&
+                                preview?.tipo === "pdf" && (
+
                                 <iframe
                                     src={preview.url}
                                     title={archivo.nombre}
@@ -179,19 +359,36 @@ function FileCard({ archivo, actualizar, admin = false }) {
                                 />
                             )}
 
-                            {/* Word / Excel convertido a HTML */}
-                            {!cargando && preview?.tipo === "html" && (
+                            {/*WORD Y EXCEL*/}
+                            {!cargando &&
+                                preview?.tipo === "html" && (
+
                                 <div
                                     className="modal-html"
-                                    dangerouslySetInnerHTML={{ __html: preview.html }}
+
+                                    dangerouslySetInnerHTML={{
+                                        __html:
+                                            preview.html
+                                    }}
                                 />
                             )}
 
-                            {/* PowerPoint — sin soporte local */}
-                            {!cargando && preview?.tipo === "pptx" && (
+                            {/*POWERPOINT*/}
+                            {!cargando &&
+                                preview?.tipo === "pptx" && (
+
                                 <div className="modal-error">
-                                    PowerPoint no tiene previsualización disponible en local.<br />
-                                    Usa el botón <strong>Descargar</strong> para abrirlo.
+
+                                    PowerPoint no tiene previsualización disponible en local.
+
+                                    <br />
+
+                                    Usa el botón
+                                    <strong>
+                                        Descargar
+                                    </strong>
+                                    para abrirlo.
+
                                 </div>
                             )}
 
@@ -203,4 +400,5 @@ function FileCard({ archivo, actualizar, admin = false }) {
     );
 }
 
+//SE EXPORTA EL COMPONENTE
 export default FileCard;
