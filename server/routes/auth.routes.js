@@ -26,6 +26,23 @@ router.post("/register", async (req, res) => {
         return res.json({ error: "Faltan datos" });
     }
 
+    //VALIDAR PASSWORD
+    if (password.length < 6) {
+
+        return res.json({
+            error:
+                "La contraseña debe tener al menos 6 caracteres"
+        });
+    }
+
+    if (username.length < 3) {
+
+    return res.json({
+        error:
+            "El usuario debe tener al menos 3 caracteres"
+    });
+}
+
     //SE NORMALIZA EL NOMBRE DE USUARIO
     const usernameNormalizado = username.trim().toLowerCase();
 

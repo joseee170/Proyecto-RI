@@ -40,8 +40,8 @@ const storage = multer.diskStorage({
     }
 });
 
-//TIPOS DE ARCHIVOS PERMITIDOS
 const allowedMimeTypes = [
+    // DOCUMENTOS
     "application/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -49,18 +49,29 @@ const allowedMimeTypes = [
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "application/vnd.ms-powerpoint",
     "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+
+    // IMAGENES
     "image/jpeg",
     "image/png",
     "image/webp",
     "image/gif",
+
+    // VIDEOS
     "video/mp4",
     "video/webm",
-    "video/ogg",
-    "audio/mpeg",
-    "audio/wav",
+
+    // AUDIOS
+    "audio/mpeg",   // .mp3
+    "audio/mp3",    // .mp3 alternativo que envían algunos navegadores
+    "audio/wav",    // .wav
+    "audio/x-wav",  // .wav alternativo
+    "audio/ogg",    // .ogg
+    "audio/mp4",    // .m4a
+    "audio/m4a",    // .m4a alternativo
+    "audio/x-m4a",  // .m4a alternativo
     "audio/ogg",
-    "audio/mp4",
-    "audio/x-m4a"
+    "audio/opus",           // ← OGG Opus de WhatsApp
+    "audio/ogg; codecs=opus" // ← algunos navegadores envían esto
 ];
 
 //EXTENSIONES PERMITIDAS
@@ -78,7 +89,8 @@ const allowedExtensions = [
 const GRUPOS = {
     imagen: ["image/jpeg","image/png","image/gif","image/webp","image/bmp","image/svg+xml"],
     video:  ["video/mp4","video/webm","video/ogg","video/quicktime","video/x-msvideo"],
-    audio:  ["audio/mpeg","audio/wav","audio/ogg","audio/mp4","audio/x-m4a","audio/aac"],
+    audio:  ["audio/mpeg","audio/wav", "audio/x-wav", "audio/ogg", "audio/vorbis","audio/mp4","audio/x-m4a","audio/aac", 
+                "video/mp4", "audio/ogg","audio/opus", "audio/ogg; codecs=opus",],
     doc:    [
         "application/pdf",
         "application/zip", // docx, xlsx, pptx son ZIP internamente
@@ -96,7 +108,7 @@ const GRUPOS = {
 const EXT_GRUPO = {
     ".jpg": "imagen", ".jpeg": "imagen", ".png": "imagen",
     ".gif": "imagen", ".webp": "imagen",
-    ".mp4": "video",  ".webm": "video",  ".ogg": "video",
+    ".mp4": "video",  ".webm": "video",  ".ogg": "audio",
     ".mp3": "audio",  ".wav":  "audio",  ".m4a": "audio",
     ".pdf": "doc",    ".doc":  "doc",    ".docx": "doc",
     ".xls": "doc",    ".xlsx": "doc",    ".ppt":  "doc", ".pptx": "doc",
@@ -438,7 +450,30 @@ router.get("/preview/:id", (req, res) => {
 
             //PREVISUALIZACION POWERPOINT
             if (ext === "pptx" || ext === "ppt") {
-                return res.json({ tipo: "pptx" });
+                const officeparser = require("officeparser");
+                
+                const texto = await officeparser.parseOfficeAsync(row.ruta);
+                
+                // Convertir el texto extraído a diapositivas separadas por saltos
+                const html = texto
+                    .split(/\n{2,}/)
+                    .filter(bloque => bloque.trim())
+                    .map((bloque, i) => `
+                        <div class="slide">
+                            <div class="slide-numero">Diapositiva ${i + 1}</div>
+                            <div class="slide-contenido">
+                                ${bloque
+                                    .split(/\n/)
+                                    .filter(l => l.trim())
+                                    .map(l => `<p>${l}</p>`)
+                                    .join("")
+                                }
+                            </div>
+                        </div>
+                    `)
+                    .join("");
+
+                return res.json({ tipo: "html", html });
             }
 
             return res.json({ error: "Formato no soportado" });

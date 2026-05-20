@@ -37,10 +37,9 @@
     overflow: hidden;
 }
 
-/* MULTIMEDIA INLINE */
 .file-card > img,
-.file-card > video,
-.file-card > iframe {
+.file-card video,
+.file-card iframe {
     width: 100%;
     height: 150px;
     object-fit: contain;
@@ -65,6 +64,7 @@
     width: 90px !important;
     height: 90px !important;
     object-fit: contain !important;
+    border-radius: 0 !important;
     margin: 0 !important;
 }
 
@@ -89,13 +89,13 @@
     flex: 1;
 }
 
-.download-button { background: #16a34a; }
+.download-button       { background: #16a34a; }
 .download-button:hover { background: #15803d; }
 
-.visualizar-button { background: #2563eb; }
+.visualizar-button       { background: #2563eb; }
 .visualizar-button:hover { background: #1d4ed8; }
 
-.delete-button { background: #ef4444; }
+.delete-button       { background: #ef4444; }
 .delete-button:hover { background: #dc2626; }
 
 /* MODAL OVERLAY */
@@ -112,7 +112,7 @@
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 /* MODAL CONTENIDO */
@@ -136,6 +136,7 @@
     padding: 14px 20px;
     border-bottom: 1px solid #e5e7eb;
     background: #f9fafb;
+    flex-shrink: 0;
 }
 
 .modal-titulo {
@@ -155,6 +156,8 @@
     color: #6b7280;
     padding: 2px 8px;
     border-radius: 6px;
+    transition: background 0.15s;
+    flex-shrink: 0;
 }
 
 .modal-cerrar:hover {
@@ -169,7 +172,7 @@
     flex: 1;
 }
 
-/* PDF */
+/* PDF EN MODAL */
 .modal-iframe {
     width: 100%;
     height: 65vh;
@@ -177,7 +180,7 @@
     border-radius: 6px;
 }
 
-/* WORD EXCEL */
+/* WORD / EXCEL / POWERPOINT EN MODAL */
 .modal-html {
     font-size: 14px;
     line-height: 1.7;
@@ -209,7 +212,7 @@
     margin-bottom: 10px;
 }
 
-/* ESTADOS */
+/* ESTADOS DEL MODAL */
 .modal-cargando {
     text-align: center;
     color: #6b7280;
@@ -229,7 +232,7 @@
     color: #2563eb;
 }
 
-/* IMAGEN MODAL */
+/* IMAGEN EXPANDIDA */
 .img-modal-wrap {
     position: relative;
     display: flex;
@@ -238,9 +241,34 @@
 }
 
 .img-fullscreen {
-    max-width: 90vw;
-    max-height: 90vh;
+    max-width: 92vw;
+    max-height: 92vh;
     object-fit: contain;
     border-radius: 10px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* DIAPOSITIVAS POWERPOINT */
+.slide {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+    background: #fafafa;
+}
+
+.slide-numero {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2563eb;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.slide-contenido p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #1f2937;
+    line-height: 1.6;
 }
