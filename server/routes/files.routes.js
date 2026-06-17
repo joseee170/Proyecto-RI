@@ -448,13 +448,14 @@ router.get("/preview/:id", (req, res) => {
                 return res.json({ tipo: "html", html: hojas });
             }
 
-            //PREVISUALIZACION POWERPOINT
+            
+           //PREVISUALIZACION POWERPOINT
             if (ext === "pptx" || ext === "ppt") {
-                const officeparser = require("officeparser");
-                
-                const texto = await officeparser.parseOfficeAsync(row.ruta);
-                
-                // Convertir el texto extraído a diapositivas separadas por saltos
+                const { parseOffice } = require("officeparser");
+
+                const ast   = await parseOffice(row.ruta);
+                const texto = ast.toText(); // ← extrae el texto del AST
+
                 const html = texto
                     .split(/\n{2,}/)
                     .filter(bloque => bloque.trim())

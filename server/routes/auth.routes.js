@@ -35,6 +35,14 @@ router.post("/register", async (req, res) => {
         });
     }
 
+    if (username.length > 15) {
+
+        return res.json({
+            error:
+                "Usuario con muchos carácteres"
+        });
+    }
+
     if (username.length < 3) {
 
     return res.json({
