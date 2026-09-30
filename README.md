@@ -1,204 +1,209 @@
 # Sistema de Recuperación de Información Multimedia
 
-Aplicación web fullstack para subir, clasificar automáticamente y buscar archivos multimedia mediante TF-IDF y similitud coseno.
+Aplicación web fullstack desarrollada para la **gestión, clasificación y recuperación de archivos multimedia**. El sistema permite subir documentos, imágenes, videos y audios, extraer información de su contenido y realizar búsquedas basadas en **TF-IDF y similitud coseno**.
 
----
+## Características
+
+* Autenticación de usuarios mediante JWT.
+* Control de acceso mediante roles.
+* Carga y gestión de archivos multimedia.
+* Búsqueda de archivos por contenido y palabras clave.
+* Clasificación de documentos mediante técnicas de Recuperación de Información.
+* Cálculo de relevancia mediante TF-IDF y similitud coseno.
+* Extracción de texto de documentos.
+* OCR para extracción de texto desde imágenes.
+* Soporte para archivos de audio.
+* Soporte para archivos de video.
+* Descarga de archivos almacenados.
+* Persistencia de información mediante SQLite.
+
+## Tecnologías
+
+### Frontend
+
+* React
+* React Router
+* Axios
+* HTML5
+* CSS3
+* JavaScript
+
+### Backend
+
+* Node.js
+* Express
+* SQLite
+* JWT
+* Multer
+* bcrypt
+
+### Procesamiento de información
+
+* TF-IDF
+* Similitud Coseno
+* Natural
+* K-Means
+* Tesseract.js
+* Sharp
+
+### Multimedia
+
+* FFmpeg
+* fluent-ffmpeg
 
 ## Estructura del proyecto
 
+```text
+Proyecto-RI/
+│
+├── public/                  # Archivos públicos del frontend
+│
+├── src/                     # Aplicación frontend en React
+│   ├── components/          # Componentes reutilizables
+│   ├── pages/               # Vistas de la aplicación
+│   ├── services/            # Comunicación con el backend
+│   └── ...
+│
+├── server/                  # Backend de la aplicación
+│   ├── config/              # Configuración
+│   ├── middleware/          # Middleware de autenticación y seguridad
+│   ├── routes/              # Rutas de la API REST
+│   ├── utils/               # Funciones auxiliares y procesamiento
+│   ├── uploads/             # Archivos cargados
+│   ├── tessdata/            # Modelos de idioma para OCR
+│   └── index.js             # Punto de entrada del servidor
+│
+├── package.json             # Dependencias y scripts del frontend
+└── server/package.json      # Dependencias del backend
 ```
-proyecto/
-├── src/                  # Frontend React
-├── server/               # Backend Node.js
-│   ├── config/
-│   ├── middleware/
-│   ├── routes/
-│   ├── utils/
-│   ├── uploads/
-│   ├── tessdata/         # Modelos OCR locales
-│   └── index.js
-├── package.json          # Dependencias frontend
-└── server/package.json   # Dependencias backend
-```
 
----
+## Formatos soportados
 
-## Requisitos previos
+El sistema permite trabajar con diferentes tipos de archivos:
 
-- [Node.js](https://nodejs.org/) v18
-- npm v9 o superior
+| Tipo       | Formatos                             |
+| ---------- | ------------------------------------ |
+| Imágenes   | JPG, JPEG, PNG, WEBP, GIF            |
+| Videos     | MP4, WEBM, OGG                       |
+| Audios     | MP3, WAV, OGG, M4A                   |
+| Documentos | PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX |
 
----
+**Tamaño máximo:** 200 MB por archivo.
 
-## Instalación y ejecución
+## Roles de usuario
 
-### 1. Clonar o descomprimir el proyecto
+| Función            | Administrador | Visualizador |
+| ------------------ | :-----------: | :----------: |
+| Subir archivos     |       ✓       |       ✗      |
+| Eliminar archivos  |       ✓       |       ✗      |
+| Buscar archivos    |       ✓       |       ✓      |
+| Descargar archivos |       ✓       |       ✓      |
+
+## Recuperación de información
+
+El sistema utiliza técnicas de **Recuperación de Información (RI)** para determinar la relevancia de los resultados.
+
+El proceso general es:
+
+1. El usuario carga un archivo.
+2. El sistema extrae el contenido disponible.
+3. Se identifican términos relevantes mediante TF-IDF.
+4. Las consultas del usuario se convierten en vectores.
+5. Se calcula la similitud coseno entre la consulta y los documentos.
+6. Los resultados se ordenan de acuerdo con su relevancia.
+
+Además, el sistema considera coincidencias en elementos como el nombre del archivo, palabras clave y categoría.
+
+## Requisitos
+
+* Node.js 18 o superior
+* npm 9 o superior
+
+## Instalación
+
+### 1. Instalar dependencias del frontend
 
 ```bash
-cd proyecto
-```
-
-### 2. Instalar dependencias del frontend
-
-```bash
-# Desde la raíz del proyecto
 npm install
 ```
 
-### 3. Instalar dependencias del backend
+### 2. Instalar dependencias del backend
 
 ```bash
 cd server
 npm install
 ```
 
-### 4. Descargar modelos OCR (solo la primera vez)
+### 3. Configurar variables de entorno
 
-Crea la carpeta `server/tessdata/` y descarga los dos archivos:
-
-- **Español:** https://github.com/tesseract-ocr/tessdata_fast/raw/main/spa.traineddata
-- **Inglés:** https://github.com/tesseract-ocr/tessdata_fast/raw/main/eng.traineddata
-
-```
-server/
-  tessdata/
-    spa.traineddata
-    eng.traineddata
-```
-
-### 5. Ejecutar el backend
-
-```bash
-# Desde server/
-node index.js
-# Servidor corriendo en http://localhost:3001
-```
-
-### 6. Ejecutar el frontend
-
-```bash
-# Desde la raíz del proyecto (nueva terminal)
-npm start
-# App corriendo en http://localhost:3000
-```
-
----
-
-## Dependencias Frontend
-
-| Librería | Versión | Uso |
-|---|---|---|
-| `react` | ^19.2.6 | Framework principal de UI |
-| `react-dom` | ^19.2.6 | Renderizado en el DOM |
-| `react-router-dom` | ^7.15.1 | Navegación entre páginas (Login, Admin, Viewer) |
-| `axios` | ^1.16.1 | Peticiones HTTP al backend |
-| `react-scripts` | 5.0.1 | Scripts de desarrollo y build (Create React App) |
-| `web-vitals` | ^2.1.4 | Métricas de rendimiento |
-| `@testing-library/react` | ^16.3.2 | Tests de componentes React |
-| `@testing-library/jest-dom` | ^6.9.1 | Matchers adicionales para Jest |
-| `@testing-library/user-event` | ^13.5.0 | Simulación de eventos de usuario en tests |
-| `@testing-library/dom` | ^10.4.1 | Utilidades DOM para tests |
-
----
-
-## Dependencias Backend
-
-### Servidor y autenticación
-
-| Librería | Versión | Uso |
-|---|---|---|
-| `express` | ^5.2.1 | Framework HTTP, definición de rutas REST |
-| `cors` | ^2.8.6 | Habilita peticiones cross-origin desde el frontend |
-| `multer` | ^2.1.1 | Manejo de subida de archivos multipart/form-data |
-| `jsonwebtoken` | ^9.0.3 | Generación y verificación de tokens JWT para autenticación |
-| `bcrypt` | ^6.0.0 | Hash seguro de contraseñas de usuarios |
-| `sqlite3` | ^6.0.1 | Base de datos embebida para almacenamiento de metadatos |
-
-### Extracción de texto de documentos
-
-| Librería | Versión | Uso |
-|---|---|---|
-| `pdf-parse` | ^1.1.1 | Extracción de texto de archivos PDF |
-| `mammoth` | ^1.12.0 | Extracción de texto de archivos Word modernos (`.docx`) |
-| `word-extractor` | ^1.0.4 | Extracción de texto de archivos Word antiguos (`.doc`) |
-| `xlsx` | ^0.18.5 | Lectura y extracción de texto de hojas de cálculo (`.xlsx`, `.xls`) |
-
-### OCR e imágenes
-
-| Librería | Versión | Uso |
-|---|---|---|
-| `tesseract.js` | ^7.0.0 | OCR para extracción de texto en imágenes y documentos escaneados |
-| `sharp` | ^0.34.5 | Procesamiento y optimización de imágenes |
-
-### Recuperación de información
-
-| Librería | Versión | Uso |
-|---|---|---|
-| `natural` | ^8.1.1 | Herramientas de NLP: tokenización y stemming |
-| `ml-kmeans` | ^7.0.0 | Algoritmo K-Means para clustering de documentos |
-| `keyword-extractor` | ^0.0.28 | Extracción de palabras clave (instalada, actualmente en desuso) |
-
-### Multimedia
-
-| Librería | Versión | Uso |
-|---|---|---|
-| `fluent-ffmpeg` | ^2.1.3 | Procesamiento de archivos de video y audio |
-| `ffmpeg-static` | ^5.3.0 | Binario estático de FFmpeg empaquetado con el proyecto |
-
-### IA (instalada, uso experimental)
-
-| Librería | Versión | Uso |
-|---|---|---|
-| `@xenova/transformers` | ^2.17.2 | Modelos de lenguaje transformer para embeddings semánticos |
-
----
-
-## Variables de entorno
-
-Crea un archivo `.env` dentro de `server/` con el siguiente contenido:
+Crear un archivo `.env` dentro de `server/`:
 
 ```env
-JWT_SECRET=tu_clave_secreta_aqui
+JWT_SECRET=tu_clave_secreta
 PORT=3001
 ```
 
----
+### 4. Configurar OCR
 
-## Formatos de archivo soportados
+Crear la carpeta:
 
-| Tipo | Extensiones |
-|---|---|
-| Imágenes | jpg, jpeg, png, webp, gif |
-| Videos | mp4, webm, ogg |
-| Audios | mp3, wav, ogg, m4a |
-| Documentos | pdf, doc, docx, xls, xlsx, ppt, pptx |
+```text
+server/tessdata/
+```
 
-**Tamaño máximo por archivo:** 200 MB
+Colocar dentro los modelos de idioma:
 
----
+```text
+spa.traineddata
+eng.traineddata
+```
 
-## Roles de usuario
+Estos modelos son necesarios para el reconocimiento de texto mediante OCR.
 
-| Rol | Subir | Eliminar | Buscar | Descargar |
-|---|---|---|---|---|
-| Administrador | ✓ | ✓ | ✓ | ✓ |
-| Visualizador | ✗ | ✗ | ✓ | ✓ |
+## Ejecución
 
----
+### Backend
 
-## Modelo de recuperación
+Desde la carpeta `server/`:
 
-El sistema usa **TF-IDF + Similitud Coseno** para clasificar y buscar documentos:
+```bash
+node index.js
+```
 
-1. Al subir un archivo se extrae el texto y se calculan las keywords por frecuencia de término.
-2. En cada búsqueda se vectorizan la consulta y los documentos con TF-IDF.
-3. Se calcula la similitud coseno y se aplica un boost por coincidencia en nombre, keywords y categoría.
-4. Los resultados se ordenan por relevancia descendente.
+El servidor estará disponible en:
 
----
+```text
+http://localhost:3001
+```
+
+### Frontend
+
+En otra terminal, desde la raíz del proyecto:
+
+```bash
+npm start
+```
+
+La aplicación estará disponible en:
+
+```text
+http://localhost:3000
+```
+
+## Seguridad
+
+El sistema implementa:
+
+* Autenticación mediante JWT.
+* Contraseñas almacenadas mediante hash con bcrypt.
+* Control de acceso basado en roles.
+* Validación de archivos.
+* Separación entre frontend y backend mediante una API REST.
 
 ## Notas
 
-- `keyword-extractor` está instalado pero no se usa activamente; la extracción de keywords se realiza con TF-IDF propio.
-- `@xenova/transformers` está instalado para uso futuro con embeddings semánticos.
-- Los modelos OCR (`spa.traineddata`, `eng.traineddata`) deben descargarse manualmente y colocarse en `server/tessdata/` antes de la primera ejecución.
+* Los modelos OCR deben colocarse manualmente en `server/tessdata/`.
+* `keyword-extractor` se encuentra instalado como dependencia, pero la extracción actual de palabras clave se realiza mediante TF-IDF.
+* `@xenova/transformers` se encuentra preparado para futuras implementaciones de embeddings semánticos.
+* Los archivos cargados se almacenan en `server/uploads/`.
+
